@@ -14,7 +14,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const dbConnectTimeout = 10 * time.Second
+const (
+	dbConnectTimeout = 10 * time.Second
+	gracefulTimeout  = 10 * time.Second
+)
 
 func main() {
 	e := echo.New()
@@ -33,16 +36,16 @@ func main() {
 		signal.Notify(signalChannel, os.Interrupt)
 		<-signalChannel
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), gracefulTimeout)
 		defer cancel()
 
-		err := e.Shutdown(ctx)
-		if err != nil && err != http.ErrServerClosed {
-			log.Fatalf("shutdown server: %s", err)
+		if err := e.Shutdown(ctx); err != nil {
+			log.Printf("failed to shutdown server: %s", err)
 		}
 	}()
-	err = e.Start(fmt.Sprintf(":%d", cfg.Port))
-	failOnError(err, "get config")
+	if err = e.Start(fmt.Sprintf(":%d", cfg.Port)); err != http.ErrServerClosed {
+		log.Printf("server shutdown caused by:%s", err)
+	}
 }
 
 func getDb(ctx context.Context, connString string) (*pgxpool.Pool, error) {
