@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +11,8 @@ import (
 	"time"
 
 	"github.com/cloudmachinery/movie-reviews/internal/config"
+	"github.com/cloudmachinery/movie-reviews/internal/modules/auth"
+	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 )
@@ -27,9 +30,15 @@ func main() {
 
 	db, err := getDb(context.Background(), cfg.DbUrl)
 	failOnError(err, "connect to db")
+	defer db.Close()
 
-	err = db.Ping(context.Background())
-	failOnError(err, "ping db")
+	jwtService := jwt.NewService(cfg.JWT.Secret, cfg.JWT.AccessExpiration)
+	usersModule := users.NewModule(db)
+	authModule := auth.NewModule(usersModule.Service, jwtService)
+
+	e.POST("api/auth/register", authModule.Handler.Register)
+	e.POST("/api/auth/login", authModule.Handler.Login)
+	e.GET("/api/users", usersModule.Handler.GetUsers)
 
 	go func() {
 		signalChannel := make(chan os.Signal, 1)
