@@ -4,3 +4,4 @@ Dockerfile
 .dockerignore
 .env
 .gitignore
+tern
