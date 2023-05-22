@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
 	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
 	"golang.org/x/crypto/bcrypt"
@@ -34,8 +35,9 @@ func (s *Service) Register(ctx context.Context, user *users.User, password strin
 
 	return s.userService.Create(ctx, userWithPassword)
 }
+
 func (s *Service) Login(ctx context.Context, email, password string) (string, error) {
-	user, err := s.userService.GetUserWithPassword(ctx, email)
+	user, err := s.userService.GetExistingUserWithPassword(ctx, email)
 	if err != nil {
 		return "", err
 	}

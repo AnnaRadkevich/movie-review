@@ -1,15 +1,16 @@
 package users
 
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
 	service *Service
 }
 
-func (h Handler) GetUsers(c echo.Context) error {
+func (h *Handler) GetUsers(c echo.Context) error {
 	return c.String(http.StatusOK, "not implemented")
 }
 

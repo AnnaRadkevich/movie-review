@@ -22,15 +22,14 @@ func (r *Repository) Create(ctx context.Context, user *UserWithPassword) error {
 	return err
 }
 
-func (r *Repository) GetUserWithPassword(ctx context.Context, email string) (*UserWithPassword, error) {
+func (r *Repository) GetExistingUserWithPassword(ctx context.Context, email string) (*UserWithPassword, error) {
 	queryString := `
 	SELECT id, username, email, pass_hash, role, created_at, deleted_at, bio
 	FROM users
-	WHERE email = $1;`
+	WHERE email = $1 AND deleted_at IS NULL;`
 
 	user := UserWithPassword{
-		User:         &User{},
-		PasswordHash: "",
+		User: &User{},
 	}
 
 	row := r.db.QueryRow(ctx, queryString, email)

@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
 
 	"github.com/cloudmachinery/movie-reviews/internal/config"
 	"github.com/cloudmachinery/movie-reviews/internal/modules/auth"
@@ -67,6 +68,7 @@ func getDb(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	}
 	return db, nil
 }
+
 func failOnError(err error, message string) {
 	if err != nil {
 		log.Fatalf("%s:%s", message, err)

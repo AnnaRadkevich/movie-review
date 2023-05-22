@@ -13,6 +13,7 @@ func (s *Service) Create(ctx context.Context, user *UserWithPassword) error {
 func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
-func (s *Service) GetUserWithPassword(ctx context.Context, email string) (*UserWithPassword, error) {
-	return s.repo.GetUserWithPassword(ctx, email)
+
+func (s *Service) GetExistingUserWithPassword(ctx context.Context, email string) (*UserWithPassword, error) {
+	return s.repo.GetExistingUserWithPassword(ctx, email)
 }

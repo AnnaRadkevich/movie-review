@@ -16,6 +16,7 @@ func NewHandler(authService *Service) *Handler {
 		authService: authService,
 	}
 }
+
 func (h *Handler) Register(c echo.Context) error {
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {

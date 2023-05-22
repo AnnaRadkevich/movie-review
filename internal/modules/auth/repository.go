@@ -1,7 +1,6 @@
 package auth
 
-type Repository struct {
-}
+type Repository struct{}
 
 func NewRepository() *Repository {
 	return &Repository{}

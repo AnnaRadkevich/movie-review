@@ -2,10 +2,11 @@ package jwt
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 	"strconv"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -19,6 +20,7 @@ func NewService(secret string, accessExpiration time.Duration) *Service {
 		accessExpiration: accessExpiration,
 	}
 }
+
 func (s *Service) GenerateToken(id int, role string) (string, error) {
 	now := time.Now()
 	claims := &AccessClaims{
