@@ -3,6 +3,8 @@ package auth
 import (
 	"net/http"
 
+	"gopkg.in/validator.v2"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
 	"github.com/labstack/echo/v4"
 )
@@ -22,7 +24,9 @@ func (h *Handler) Register(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
-
+	if err := validator.Validate(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 	user := &users.User{
 		Username: req.Username,
 		Email:    req.Email,
@@ -39,7 +43,9 @@ func (h *Handler) Login(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
-
+	if err := validator.Validate(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 	accessToken, err := h.authService.Login(c.Request().Context(), req.Email, req.Password)
 	if err != nil {
 		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
@@ -52,14 +58,14 @@ func (h *Handler) Login(c echo.Context) error {
 }
 
 type RegisterRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"min=5,max=16" `
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password" validate:"password"`
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password" validate:"password"`
 }
 
 type LoginResponse struct {

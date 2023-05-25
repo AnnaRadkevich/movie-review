@@ -49,7 +49,7 @@ func (s *Service) Login(ctx context.Context, email, password string) (string, er
 
 	accessToken, err := s.jwtService.GenerateToken(user.ID, user.Role)
 	if err != nil {
-		return "", fmt.Errorf("Generate token: %w", err)
+		return "", fmt.Errorf("Generate token: %w", err.Error())
 	}
 	return accessToken, nil
 }
