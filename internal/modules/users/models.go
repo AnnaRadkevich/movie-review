@@ -2,6 +2,12 @@ package users
 
 import "time"
 
+const (
+	AdminRole  = "admin"
+	EditorRole = "editor"
+	UserRole   = "user"
+)
+
 type User struct {
 	ID        int        `json:"id"`
 	Username  string     `json:"username"`
@@ -19,4 +25,10 @@ func (u *User) IsDeleted() bool {
 type UserWithPassword struct {
 	*User
 	PasswordHash string
+}
+
+func newUserWithPassword() *UserWithPassword {
+	return &UserWithPassword{
+		User: &User{},
+	}
 }

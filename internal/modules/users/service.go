@@ -1,6 +1,8 @@
 package users
 
-import "context"
+import (
+	"context"
+)
 
 type Service struct {
 	repo *Repository
@@ -16,4 +18,16 @@ func NewService(repo *Repository) *Service {
 
 func (s *Service) GetExistingUserWithPassword(ctx context.Context, email string) (*UserWithPassword, error) {
 	return s.repo.GetExistingUserWithPassword(ctx, email)
+}
+
+func (s *Service) Delete(ctx context.Context, userId int) error {
+	return s.repo.Delete(ctx, userId)
+}
+
+func (s *Service) Get(ctx context.Context, userId int) (user *User, err error) {
+	return s.repo.GetUserById(ctx, userId)
+}
+
+func (s *Service) Update(ctx context.Context, userId int, bio string) error {
+	return s.repo.Update(ctx, userId, bio)
 }

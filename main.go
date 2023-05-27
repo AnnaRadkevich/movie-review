@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/cloudmachinery/movie-reviews/internal/validation"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
 
 	"github.com/cloudmachinery/movie-reviews/internal/config"
@@ -24,10 +26,10 @@ const (
 )
 
 func main() {
-	e := echo.New()
-
 	cfg, err := config.NewConfig()
 	failOnError(err, "parse config")
+
+	validation.SetupValidators()
 
 	db, err := getDb(context.Background(), cfg.DbUrl)
 	failOnError(err, "connect to db")
@@ -36,10 +38,17 @@ func main() {
 	jwtService := jwt.NewService(cfg.JWT.Secret, cfg.JWT.AccessExpiration)
 	usersModule := users.NewModule(db)
 	authModule := auth.NewModule(usersModule.Service, jwtService)
+	authMiddleware := jwt.NewAuthMiddleware(cfg.JWT.Secret)
 
-	e.POST("api/auth/register", authModule.Handler.Register)
-	e.POST("/api/auth/login", authModule.Handler.Login)
-	e.GET("/api/users", usersModule.Handler.GetUsers)
+	e := echo.New()
+	api := e.Group("/api")
+
+	api.POST("/auth/register", authModule.Handler.Register)
+	api.POST("/auth/login", authModule.Handler.Login)
+
+	api.GET("/users/:userId", usersModule.Handler.Get)
+	api.DELETE("/users/:userId", usersModule.Handler.Delete, authMiddleware, auth.Self)
+	api.PUT("/users/:userId", usersModule.Handler.Update, authMiddleware, auth.Self)
 
 	go func() {
 		signalChannel := make(chan os.Signal, 1)
