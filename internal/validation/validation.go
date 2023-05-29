@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
 	"net/mail"
 	"strings"
 
@@ -15,6 +16,7 @@ func SetupValidators() {
 	}{
 		{"password", password},
 		{"email", email},
+		{"role", role},
 	}
 
 	for _, v := range validators {
@@ -63,4 +65,15 @@ func email(v interface{}, _ string) error {
 	}
 	_, err := mail.ParseAddress(s)
 	return err
+}
+
+func role(v interface{}, _ string) error {
+	s, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("role only validates string ")
+	}
+	if !(s == users.UserRole || s == users.EditorRole || s == users.AdminRole) {
+		return fmt.Errorf("role must be only user/editor/admin: %d", s)
+	}
+	return nil
 }

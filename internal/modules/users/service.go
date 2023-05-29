@@ -28,6 +28,9 @@ func (s *Service) Get(ctx context.Context, userId int) (user *User, err error) {
 	return s.repo.GetUserById(ctx, userId)
 }
 
-func (s *Service) Update(ctx context.Context, userId int, bio string) error {
-	return s.repo.Update(ctx, userId, bio)
+func (s *Service) UpdateBio(ctx context.Context, userId int, bio string) error {
+	return s.repo.UpdateBio(ctx, userId, bio)
+}
+func (s *Service) UpdateRole(ctx context.Context, userId int, role string) error {
+	return s.repo.UpdateRole(ctx, userId, role)
 }

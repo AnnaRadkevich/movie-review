@@ -3,9 +3,9 @@ package users
 import "time"
 
 const (
-	AdminRole  = "admin"
-	EditorRole = "editor"
 	UserRole   = "user"
+	EditorRole = "editor"
+	AdminRole  = "admin"
 )
 
 type User struct {

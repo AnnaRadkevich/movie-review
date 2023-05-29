@@ -3,13 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
+	"github.com/cloudmachinery/movie-reviews/internal/echox"
+	"github.com/cloudmachinery/movie-reviews/internal/validation"
+	"github.com/labstack/echo/v4/middleware"
+	"golang.org/x/exp/slog"
+	"gopkg.in/validator.v2"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/cloudmachinery/movie-reviews/internal/validation"
 
 	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
 
@@ -21,8 +25,9 @@ import (
 )
 
 const (
-	dbConnectTimeout = 10 * time.Second
-	gracefulTimeout  = 10 * time.Second
+	dbConnectTimeout     = 10 * time.Second
+	gracefulTimeout      = 10 * time.Second
+	adminCreationTimeout = 10 * time.Second
 )
 
 func main() {
@@ -38,17 +43,22 @@ func main() {
 	jwtService := jwt.NewService(cfg.JWT.Secret, cfg.JWT.AccessExpiration)
 	usersModule := users.NewModule(db)
 	authModule := auth.NewModule(usersModule.Service, jwtService)
-	authMiddleware := jwt.NewAuthMiddleware(cfg.JWT.Secret)
 
+	err = createAdmin(cfg.Admin, authModule.Service)
 	e := echo.New()
+	e.HTTPErrorHandler = echox.ErrorHandler
+
+	e.Use(middleware.Recover())
 	api := e.Group("/api")
+	api.Use(jwt.NewAuthMiddleware(cfg.JWT.Secret))
 
 	api.POST("/auth/register", authModule.Handler.Register)
 	api.POST("/auth/login", authModule.Handler.Login)
 
 	api.GET("/users/:userId", usersModule.Handler.Get)
-	api.DELETE("/users/:userId", usersModule.Handler.Delete, authMiddleware, auth.Self)
-	api.PUT("/users/:userId", usersModule.Handler.Update, authMiddleware, auth.Self)
+	api.DELETE("/users/:userId", usersModule.Handler.Delete, auth.Self)
+	api.PUT("/users/:userId", usersModule.Handler.UpdateBio, auth.Self)
+	api.PUT("/users/:userID/role/:role", usersModule.Handler.UpdateRole, auth.Admin)
 
 	go func() {
 		signalChannel := make(chan os.Signal, 1)
@@ -67,6 +77,33 @@ func main() {
 	}
 }
 
+func createAdmin(cfg config.AdminConfig, authService *auth.Service) error {
+	if !cfg.IsSet() {
+		return nil
+	}
+	if err := validator.Validate(cfg); err != nil {
+		return fmt.Errorf("validate admin config: %w", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), adminCreationTimeout)
+	defer cancel()
+
+	err := authService.Register(ctx, &users.User{
+		Username: cfg.Username,
+		Email:    cfg.Email,
+		Role:     users.AdminRole,
+	}, cfg.Password)
+
+	switch {
+	case apperrors.Is(err, apperrors.InternalCode):
+		return fmt.Errorf("register admin :%w", err)
+	case err != nil:
+		return nil
+	default:
+		slog.Info("admin user created", "username", cfg.Username, "email", cfg.Email)
+		return nil
+
+	}
+}
 func getDb(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	ctx, cancel := context.WithTimeout(ctx, dbConnectTimeout)
 	defer cancel()
