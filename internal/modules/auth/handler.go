@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/cloudmachinery/movie-reviews/internal/echox"
 	"net/http"
 
 	"gopkg.in/validator.v2"
@@ -20,8 +21,8 @@ func NewHandler(authService *Service) *Handler {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	var req RegisterRequest
-	if err := c.Bind(&req); err != nil {
+	req, err := echox.BindAndValidate[RegisterRequest](c)
+	if err != nil {
 		return err
 	}
 	if err := validator.Validate(&req); err != nil {
@@ -39,8 +40,8 @@ func (h *Handler) Register(c echo.Context) error {
 }
 
 func (h *Handler) Login(c echo.Context) error {
-	var req LoginRequest
-	if err := c.Bind(&req); err != nil {
+	req, err := echox.BindAndValidate[LoginRequest](c)
+	if err != nil {
 		return err
 	}
 	if err := validator.Validate(&req); err != nil {

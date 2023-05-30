@@ -7,10 +7,16 @@ import (
 	"github.com/caarlos0/env/v8"
 )
 
+type AdminConfig struct {
+	Username string `env:"NAME" validate:"min=5,max=16"`
+	Email    string `env:"EMAIL" validate:"email"`
+	Password string `env:"PASSWORD" validate:"password"`
+}
 type Config struct {
-	DbUrl string    `env:"DB_URL"`
-	Port  int       `env:"PORT" envDefault:"8080"`
-	JWT   JwtConfig `envPrefix:"JWT_"`
+	DbUrl string      `env:"DB_URL"`
+	Port  int         `env:"PORT" envDefault:"8080"`
+	JWT   JwtConfig   `envPrefix:"JWT_"`
+	Admin AdminConfig `envPrefix:"ADMIN_"`
 }
 
 type JwtConfig struct {
@@ -25,4 +31,8 @@ func NewConfig() (*Config, error) {
 		return nil, fmt.Errorf("parse config: %w", err)
 	}
 	return &c, nil
+}
+
+func (ac *AdminConfig) IsSet() bool {
+	return ac.Username != "" && ac.Email != "" && ac.Password != ""
 }
