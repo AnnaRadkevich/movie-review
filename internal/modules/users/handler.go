@@ -1,9 +1,10 @@
 package users
 
 import (
+	"net/http"
+
 	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
 	"github.com/cloudmachinery/movie-reviews/internal/echox"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -43,6 +44,7 @@ func (h *Handler) UpdateBio(c echo.Context) error {
 	}
 	return h.service.UpdateBio(c.Request().Context(), req.UserId, req.Bio)
 }
+
 func (h *Handler) UpdateRole(c echo.Context) error {
 	req, err := echox.BindAndValidate[UpdateRoleRequest](c)
 	if err != nil {

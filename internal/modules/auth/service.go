@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+
 	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
 
 	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
