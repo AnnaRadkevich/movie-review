@@ -49,3 +49,7 @@ func (s *Service) UpdateRole(ctx context.Context, userId int, role string) error
 	log.FromContext(ctx).Info("user role updated", "userId", userId, "role", role)
 	return nil
 }
+
+func (s *Service) GetExistingUserByUsername(ctx context.Context, username string) (*User, error) {
+	return s.repo.GetExistingUserByUsername(ctx, username)
+}

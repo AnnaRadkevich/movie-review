@@ -3,6 +3,8 @@ package auth
 import (
 	"net/http"
 
+	"github.com/cloudmachinery/movie-reviews/contracts"
+
 	"github.com/cloudmachinery/movie-reviews/internal/echox"
 
 	"gopkg.in/validator.v2"
@@ -22,7 +24,7 @@ func NewHandler(authService *Service) *Handler {
 }
 
 func (h *Handler) Register(c echo.Context) error {
-	req, err := echox.BindAndValidate[RegisterRequest](c)
+	req, err := echox.BindAndValidate[contracts.RegisterUserRequest](c)
 	if err != nil {
 		return err
 	}
@@ -42,7 +44,7 @@ func (h *Handler) Register(c echo.Context) error {
 }
 
 func (h *Handler) Login(c echo.Context) error {
-	req, err := echox.BindAndValidate[LoginRequest](c)
+	req, err := echox.BindAndValidate[contracts.LoginUserRequest](c)
 	if err != nil {
 		return err
 	}
@@ -54,23 +56,8 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
 	}
 
-	response := LoginResponse{
+	response := contracts.LoginUserResponse{
 		AccessToken: accessToken,
 	}
 	return c.JSON(http.StatusOK, response)
-}
-
-type RegisterRequest struct {
-	Username string `json:"username" validate:"min=5,max=16" `
-	Email    string `json:"email" validate:"email"`
-	Password string `json:"password" validate:"password"`
-}
-
-type LoginRequest struct {
-	Email    string `json:"email" validate:"email"`
-	Password string `json:"password" validate:"password"`
-}
-
-type LoginResponse struct {
-	AccessToken string `json:"access_token"`
 }

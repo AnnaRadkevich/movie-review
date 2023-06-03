@@ -18,10 +18,6 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func (u *User) IsDeleted() bool {
-	return u.DeletedAt != nil
-}
-
 type UserWithPassword struct {
 	*User
 	PasswordHash string

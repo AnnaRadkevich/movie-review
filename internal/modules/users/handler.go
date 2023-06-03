@@ -3,9 +3,9 @@ package users
 import (
 	"net/http"
 
+	"github.com/cloudmachinery/movie-reviews/contracts"
 	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
 	"github.com/cloudmachinery/movie-reviews/internal/echox"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,7 +18,7 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) Get(c echo.Context) error {
-	req, err := echox.BindAndValidate[DeleteOrGetRequest](c)
+	req, err := echox.BindAndValidate[contracts.DeleteOrGetRequest](c)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (h *Handler) Get(c echo.Context) error {
 }
 
 func (h *Handler) Delete(c echo.Context) error {
-	req, err := echox.BindAndValidate[DeleteOrGetRequest](c)
+	req, err := echox.BindAndValidate[contracts.DeleteOrGetRequest](c)
 	if err != nil {
 		return err
 	}
@@ -38,31 +38,31 @@ func (h *Handler) Delete(c echo.Context) error {
 }
 
 func (h *Handler) UpdateBio(c echo.Context) error {
-	req, err := echox.BindAndValidate[UpdateRequest](c)
+	req, err := echox.BindAndValidate[contracts.UpdateRequest](c)
 	if err != nil {
 		return err
 	}
-	return h.service.UpdateBio(c.Request().Context(), req.UserId, req.Bio)
+	return h.service.UpdateBio(c.Request().Context(), req.UserId, *req.Bio)
 }
 
 func (h *Handler) UpdateRole(c echo.Context) error {
-	req, err := echox.BindAndValidate[UpdateRoleRequest](c)
+	req, err := echox.BindAndValidate[contracts.UpdateRoleRequest](c)
 	if err != nil {
 		return err
 	}
 	return h.service.UpdateRole(c.Request().Context(), req.UserID, req.Role)
 }
 
-type DeleteOrGetRequest struct {
-	UserId int `param:"userId"`
-}
+func (h *Handler) GetByUserName(c echo.Context) error {
+	req, err := echox.BindAndValidate[contracts.GetUserByUsernameRequest](c)
+	if err != nil {
+		return err
+	}
 
-type UpdateRequest struct {
-	UserId int    `param:"userId"`
-	Bio    string `json:"bio"`
-}
+	user, err := h.service.GetExistingUserByUsername(c.Request().Context(), req.Username)
+	if err != nil {
+		return err
+	}
 
-type UpdateRoleRequest struct {
-	UserID int    `param:"userId" validate:"nonzero"`
-	Role   string `param:"role" validate:"role"`
+	return c.JSON(http.StatusOK, user)
 }
