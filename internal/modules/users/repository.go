@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+
 	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
 	"github.com/cloudmachinery/movie-reviews/internal/dbx"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,8 +17,8 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) Create(ctx context.Context, user *UserWithPassword) error {
-	queryString := "INSERT INTO users (username, email, pass_hash, role) VALUES ($1, $2, $3, $4) returning id, created_at, role"
-	err := r.db.QueryRow(ctx, queryString, user.Username, user.Email, user.PasswordHash, user.Role).Scan(&user.ID, &user.CreatedAt, &user.Role)
+	queryString := "INSERT INTO users (username, email, pass_hash, role) VALUES ($1, $2, $3, $4) returning id, created_at"
+	err := r.db.QueryRow(ctx, queryString, user.Username, user.Email, user.PasswordHash, user.Role).Scan(&user.ID, &user.CreatedAt)
 	switch {
 	case dbx.IsUniqueViolation(err, "email"):
 		return apperrors.AlreadyExists("user", "email", user.Email)

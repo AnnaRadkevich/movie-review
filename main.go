@@ -3,17 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
-	"github.com/cloudmachinery/movie-reviews/internal/echox"
-	"github.com/cloudmachinery/movie-reviews/internal/validation"
-	"github.com/labstack/echo/v4/middleware"
-	"golang.org/x/exp/slog"
-	"gopkg.in/validator.v2"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
+	"github.com/cloudmachinery/movie-reviews/internal/echox"
+	"github.com/cloudmachinery/movie-reviews/internal/log"
+	"github.com/cloudmachinery/movie-reviews/internal/validation"
+	"github.com/labstack/echo/v4/middleware"
+	"golang.org/x/exp/slog"
+	"gopkg.in/validator.v2"
 
 	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
 
@@ -35,6 +36,12 @@ func main() {
 	failOnError(err, "parse config")
 
 	validation.SetupValidators()
+
+	logger, err := log.SetupLogger(cfg.Local, cfg.LogLevel)
+	failOnError(err, "setup logger")
+	slog.SetDefault(logger)
+
+	slog.Info("started", "config", cfg)
 
 	db, err := getDb(context.Background(), cfg.DbUrl)
 	failOnError(err, "connect to db")
@@ -69,11 +76,11 @@ func main() {
 		defer cancel()
 
 		if err := e.Shutdown(ctx); err != nil {
-			log.Printf("failed to shutdown server: %s", err)
+			slog.Error("failed to shutdown server", "err", err)
 		}
 	}()
 	if err = e.Start(fmt.Sprintf(":%d", cfg.Port)); err != http.ErrServerClosed {
-		log.Printf("server shutdown caused by:%s", err)
+		slog.Error("server shutdown caused by", "err", err)
 	}
 }
 
@@ -104,6 +111,7 @@ func createAdmin(cfg config.AdminConfig, authService *auth.Service) error {
 
 	}
 }
+
 func getDb(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	ctx, cancel := context.WithTimeout(ctx, dbConnectTimeout)
 	defer cancel()
@@ -117,6 +125,7 @@ func getDb(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 
 func failOnError(err error, message string) {
 	if err != nil {
-		log.Fatalf("%s:%s", message, err)
+		slog.Error(message, "err", err)
+		os.Exit(1)
 	}
 }

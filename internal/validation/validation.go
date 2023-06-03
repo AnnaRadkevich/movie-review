@@ -2,9 +2,10 @@ package validation
 
 import (
 	"fmt"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
 	"net/mail"
 	"strings"
+
+	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
 
 	"gopkg.in/validator.v2"
 )
