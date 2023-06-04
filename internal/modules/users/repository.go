@@ -107,3 +107,30 @@ func (r *Repository) UpdateRole(ctx context.Context, userId int, role string) er
 	}
 	return nil
 }
+
+func (r *Repository) GetExistingUserByUsername(ctx context.Context, username string) (*User, error) {
+	queryString := `
+	SELECT id, username, email, role, created_at, deleted_at, bio
+	FROM users
+	WHERE username = $1 and deleted_at IS NULL;`
+
+	user := User{}
+
+	row := r.db.QueryRow(ctx, queryString, username)
+	err := row.Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Role,
+		&user.CreatedAt,
+		&user.DeletedAt,
+		&user.Bio,
+	)
+	if dbx.IsNoRows(err) {
+		return nil, apperrors.NotFound("user", "username", username)
+	}
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+	return &user, nil
+}
