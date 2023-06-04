@@ -74,7 +74,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api.GET("/users/username/:username", usersModule.Handler.GetByUserName)
 	api.DELETE("/users/:userId", usersModule.Handler.Delete, auth.Self)
 	api.PUT("/users/:userId", usersModule.Handler.UpdateBio, auth.Self)
-	api.PUT("/users/:userID/role/:role", usersModule.Handler.UpdateRole, auth.Admin)
+	api.PUT("/users/:userId/role/:role", usersModule.Handler.UpdateRole, auth.Admin)
 
 	return &Server{e: e, cfg: cfg, closers: closers}, nil
 }

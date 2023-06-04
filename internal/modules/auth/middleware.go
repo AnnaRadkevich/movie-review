@@ -7,13 +7,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var errForbidden = apperrors.Forbidden("insufficient permissions")
+var (
+	errForbidden    = apperrors.Forbidden("insufficient permissions")
+	errUnauthorized = apperrors.Unauthorized("invalid or missing token")
+)
 
 func Self(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		claims := jwt.GetClaims(c)
 		if claims == nil {
-			return apperrors.Unauthorized("invalid or missing token")
+			return errUnauthorized
 		}
 		userId := c.Param("userId")
 		if claims.Role == users.AdminRole || claims.Subject == userId {
@@ -27,7 +30,7 @@ func Editor(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		claims := jwt.GetClaims(c)
 		if claims == nil {
-			return apperrors.Unauthorized("invalid or missing token")
+			return errUnauthorized
 		}
 		if claims.Role == users.EditorRole || claims.Role == users.AdminRole {
 			return next(c)
@@ -40,7 +43,7 @@ func Admin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		claims := jwt.GetClaims(c)
 		if claims == nil {
-			return apperrors.Unauthorized("invalid or missing token")
+			return errUnauthorized
 		}
 		if claims.Role == users.AdminRole {
 			return next(c)
