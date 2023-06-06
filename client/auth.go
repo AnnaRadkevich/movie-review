@@ -11,9 +11,12 @@ func (c *Client) RegisterUser(req *contracts.RegisterUserRequest) (*contracts.Us
 }
 
 func (c *Client) LoginUser(req *contracts.LoginUserRequest) (*contracts.LoginUserResponse, error) {
-	var res contracts.LoginUserResponse
+	var resp contracts.LoginUserResponse
 
-	_, err := c.client.R().SetBody(req).SetResult(&res).Post(c.path("/api/auth/login"))
+	_, err := c.client.R().
+		SetBody(req).
+		SetResult(&resp).
+		Post(c.path("/api/auth/login"))
 
-	return &res, err
+	return &resp, err
 }

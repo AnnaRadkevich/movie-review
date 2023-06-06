@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/cloudmachinery/movie-reviews/contracts"
-	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
 	"github.com/cloudmachinery/movie-reviews/internal/echox"
 	"github.com/labstack/echo/v4"
 )
@@ -24,7 +23,7 @@ func (h *Handler) Get(c echo.Context) error {
 	}
 	user, err := h.service.Get(c.Request().Context(), req.UserId)
 	if err != nil {
-		return apperrors.BadRequest(err)
+		return err
 	}
 	return c.JSON(http.StatusOK, user)
 }

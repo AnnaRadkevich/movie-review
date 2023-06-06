@@ -27,7 +27,10 @@ func (c *Client) UpdateUser(req *contracts.AuthenticadedRequest[*contracts.Updat
 }
 
 func (c *Client) Delete(req *contracts.AuthenticadedRequest[*contracts.DeleteOrGetRequest]) error {
-	_, err := c.client.R().SetAuthToken(req.AccessToken).Delete(c.path("/api/users/%d", req.Request.UserId))
+	_, err := c.client.R().SetAuthToken(req.AccessToken).
+		SetHeader("Content-Type", "application/json").
+		SetBody(req.Request).
+		Delete(c.path("/api/users/%d", req.Request.UserId))
 	return err
 }
 
