@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func GenressApiChecks(t *testing.T, c *client.Client) {
+func GenresApiChecks(t *testing.T, c *client.Client) {
 	t.Run("genres.GetAllGenres: empty", func(t *testing.T) {
 		genres, err := c.GetAllGenres()
 		require.NoError(t, err)

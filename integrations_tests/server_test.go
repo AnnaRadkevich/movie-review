@@ -65,5 +65,5 @@ func tests(t *testing.T, port int, cfg *config.Config) {
 
 	AuthApiChecks(t, c, cfg)
 	UsersApiChecks(t, c, cfg)
-	GenressApiChecks(t, c)
+	GenresApiChecks(t, c)
 }

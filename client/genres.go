@@ -38,7 +38,6 @@ func (c *Client) UpdateGenre(req *contracts.AuthenticadedRequest[*contracts.Upda
 
 func (c *Client) DeleteGenre(req *contracts.AuthenticadedRequest[*contracts.DeleteGenreRequest]) error {
 	_, err := c.client.R().SetAuthToken(req.AccessToken).
-		SetHeader("Content-Type", "application/json").
 		SetBody(req.Request).
 		Delete(c.path("/api/genres/%d", req.Request.GenreId))
 	return err
