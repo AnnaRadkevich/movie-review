@@ -4,4 +4,9 @@ Dockerfile
 .dockerignore
 .env
 .gitignore
+.git
+.github
 tern
+Makefile
+client
+integrations_tests

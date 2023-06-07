@@ -53,7 +53,7 @@ func (h *Handler) Login(c echo.Context) error {
 	}
 	accessToken, err := h.authService.Login(c.Request().Context(), req.Email, req.Password)
 	if err != nil {
-		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
+		return err
 	}
 
 	response := contracts.LoginUserResponse{

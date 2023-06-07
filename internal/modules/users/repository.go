@@ -23,7 +23,7 @@ func (r *Repository) Create(ctx context.Context, user *UserWithPassword) error {
 	case dbx.IsUniqueViolation(err, "email"):
 		return apperrors.AlreadyExists("user", "email", user.Email)
 	case dbx.IsUniqueViolation(err, "username"):
-		return apperrors.AlreadyExists("user", "usermane", user.Username)
+		return apperrors.AlreadyExists("user", "username", user.Username)
 	case err != nil:
 		return apperrors.Internal(err)
 	}
