@@ -1,4 +1,4 @@
-package integrations_tests
+package tests
 
 import (
 	"net/http"
@@ -36,8 +36,4 @@ func requireApiError(t *testing.T, err error, statusCode int, msg string) {
 	require.True(t, ok, "expected client.Error")
 	require.Equal(t, statusCode, cerr.Code)
 	require.Contains(t, cerr.Message, msg)
-}
-
-func ptr[T any](arg T) *T {
-	return &arg
 }

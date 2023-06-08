@@ -25,7 +25,7 @@ func (h *Handler) GetAllGenres(c echo.Context) error {
 	return c.JSON(http.StatusOK, genres)
 }
 
-func (h *Handler) GetGenreById(c echo.Context) error {
+func (h *Handler) GetGenreByID(c echo.Context) error {
 	req, err := echox.BindAndValidate[contracts.GetGenreRequest](c)
 	if err != nil {
 		return err

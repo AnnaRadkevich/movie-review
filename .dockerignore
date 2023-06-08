@@ -9,4 +9,4 @@ Dockerfile
 tern
 Makefile
 client
-integrations_tests
+integration_tests

@@ -1,4 +1,4 @@
-package integrations_tests
+package tests
 
 import (
 	"fmt"
@@ -21,7 +21,6 @@ var (
 	johnDoePass  = standardPassword
 	johnDoeToken string
 
-	admin      *contracts.User
 	adminToken string
 )
 

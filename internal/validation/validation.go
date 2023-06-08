@@ -74,7 +74,7 @@ func role(v interface{}, _ string) error {
 		return fmt.Errorf("role only validates string ")
 	}
 	if !(s == users.UserRole || s == users.EditorRole || s == users.AdminRole) {
-		return fmt.Errorf("role must be only user/editor/admin: %d", s)
+		return fmt.Errorf("role must be only user/editor/admin: %s", s)
 	}
 	return nil
 }

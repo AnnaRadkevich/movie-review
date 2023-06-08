@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
+
 	"golang.org/x/exp/slog"
 )
 
@@ -48,5 +50,5 @@ func newLevelFromString(level string) (slog.Level, error) {
 	case "error":
 		return slog.LevelError, nil
 	}
-	return slog.Level(0), fmt.Errorf("unknown level: &q", level)
+	return slog.Level(0), apperrors.InternalWithoutStackTrace(fmt.Errorf("unknown level: %q", level))
 }

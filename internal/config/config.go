@@ -22,7 +22,7 @@ type Config struct {
 }
 
 type JwtConfig struct {
-	Secret           string        `env:"SECRET"'`
+	Secret           string        `env:"SECRET"`
 	AccessExpiration time.Duration `env:"ACCESS_EXPIRATION" envDefault:"15m"`
 }
 

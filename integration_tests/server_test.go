@@ -1,4 +1,4 @@
-package integrations_tests
+package tests
 
 import (
 	"context"
@@ -66,4 +66,5 @@ func tests(t *testing.T, port int, cfg *config.Config) {
 	AuthApiChecks(t, c, cfg)
 	UsersApiChecks(t, c, cfg)
 	GenresApiChecks(t, c)
+	StarsApiChecks(t, c)
 }

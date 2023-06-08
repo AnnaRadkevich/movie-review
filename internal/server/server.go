@@ -7,6 +7,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
 
 	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
@@ -55,6 +57,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	usersModule := users.NewModule(db)
 	authModule := auth.NewModule(usersModule.Service, jwtService)
 	genresModule := genres.NewModule(db)
+	starsModule := stars.NewModule(db)
 
 	if err = createInitialAdminUser(cfg.Admin, authModule.Service); err != nil {
 		return nil, withClosers(closers, fmt.Errorf("create initial admin user: %w", err))
@@ -69,6 +72,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 
 	api := e.Group("/api")
 	api.Use(jwt.NewAuthMiddleware(cfg.JWT.Secret))
+	api.Use(echox.Logger)
 
 	// Auth API routes
 	api.POST("/auth/register", authModule.Handler.Register)
@@ -83,10 +87,17 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 
 	// Genres API routes
 	api.GET("/genres", genresModule.Handler.GetAllGenres)
-	api.GET("/genres/:genreId", genresModule.Handler.GetGenreById)
+	api.GET("/genres/:genreId", genresModule.Handler.GetGenreByID)
 	api.POST("/genres", genresModule.Handler.CreateGenre, auth.Editor)
 	api.PUT("/genres/:genreId", genresModule.Handler.UpdateGenre, auth.Editor)
 	api.DELETE("/genres/:genreId", genresModule.Handler.DeleteGenre, auth.Editor)
+
+	// Stars API routes
+	// api.GET("/stars", starsModule.Handler.GetAll)
+	api.GET("/stars/:starId", starsModule.Handler.GetStarByID)
+	api.POST("/stars", starsModule.Handler.CreateStar, auth.Editor)
+	// api.PUT("/stars/:starId", starsModule.Handler.Update, auth.Editor)
+	// api.DELETE("/stars/:starId", starsModule.Handler.Delete, auth.Editor)
 
 	return &Server{e: e, cfg: cfg, closers: closers}, nil
 }
