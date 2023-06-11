@@ -21,16 +21,16 @@ func NewService(secret string, accessExpiration time.Duration) *Service {
 	}
 }
 
-func (s *Service) GenerateToken(UserID int, role string) (string, error) {
+func (s *Service) GenerateToken(userId int, role string) (string, error) {
 	now := time.Now()
 	claims := &AccessClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        uuid.New().String(),
-			Subject:   strconv.Itoa(UserID),
+			Subject:   strconv.Itoa(userId),
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(s.accessExpiration)),
 		},
-		UserID: UserID,
+		UserID: userId,
 		Role:   role,
 	}
 
