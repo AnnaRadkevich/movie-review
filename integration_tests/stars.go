@@ -70,4 +70,73 @@ func StarsApiChecks(t *testing.T, c *client.Client) {
 		_, err := c.GetStarByID(notExistingId)
 		requireNotFoundError(t, err, "star", "id", notExistingId)
 	})
+	t.Run("stars.GetAllStars: success", func(t *testing.T) {
+		req := &contracts.GetStarsRequest{}
+		res, err := c.GetStars(req)
+		require.NoError(t, err)
+
+		require.Equal(t, 3, res.Total)
+		require.Equal(t, 1, res.Page)
+		require.Equal(t, testPaginationSize, res.Size)
+		require.Equal(t, []*contracts.Star{lucas, hamill}, res.Items)
+
+		req.Page = res.Page + 1
+		res, err = c.GetStars(req)
+		require.NoError(t, err)
+
+		require.Equal(t, 3, res.Total)
+		require.Equal(t, 2, res.Page)
+		require.Equal(t, testPaginationSize, res.Size)
+		require.Equal(t, []*contracts.Star{mcgregor}, res.Items)
+	})
+	t.Run("stars.UpdateStar: success", func(t *testing.T) {
+		req := &contracts.UpdateStarRequest{
+			ID:         lucas.ID,
+			FirstName:  lucas.FirstName,
+			MiddleName: lucas.MiddleName,
+			LastName:   "LUCAS",
+			BirthDate:  lucas.BirthDate,
+			DeathDate:  lucas.DeathDate,
+			Bio:        contracts.Ptr("UPDATE:Famous creator of Star Wars"),
+		}
+		err := c.UpdateStar(contracts.NewAuthenticated(req, johnDoeToken))
+		require.NoError(t, err)
+
+		res, err := c.GetStarByID(lucas.ID)
+		require.NoError(t, err)
+		require.Equal(t, *req.Bio, *res.Bio)
+		require.Equal(t, req.LastName, res.LastName)
+	})
+	t.Run("stars.UpdateStar: not found", func(t *testing.T) {
+		notExistingId := 10
+		req := &contracts.UpdateStarRequest{
+			ID:         notExistingId,
+			FirstName:  lucas.FirstName,
+			MiddleName: lucas.MiddleName,
+			LastName:   lucas.LastName,
+			BirthDate:  lucas.BirthDate,
+			DeathDate:  lucas.DeathDate,
+			Bio:        contracts.Ptr("UPDATE:Famous creator of Star Wars"),
+		}
+		err := c.UpdateStar(contracts.NewAuthenticated(req, johnDoeToken))
+		requireNotFoundError(t, err, "star", "id", notExistingId)
+	})
+	t.Run("stars.DeleteStar: not found", func(t *testing.T) {
+		notExistingId := 10
+		req := &contracts.GetOrDeleteStarByIDRequest{
+			ID: notExistingId,
+		}
+		err := c.DeleteStar(contracts.NewAuthenticated(req, johnDoeToken))
+		requireNotFoundError(t, err, "star", "id", notExistingId)
+	})
+	t.Run("stars.DeleteStar: success", func(t *testing.T) {
+		req := &contracts.GetOrDeleteStarByIDRequest{
+			ID: lucas.ID,
+		}
+		err := c.DeleteStar(contracts.NewAuthenticated(req, johnDoeToken))
+		require.NoError(t, err, "star", "id", lucas.ID)
+
+		_, err = c.GetStarByID(lucas.ID)
+		requireNotFoundError(t, err, "star", "id", lucas.ID)
+	})
 }

@@ -1,6 +1,9 @@
 package stars
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"github.com/cloudmachinery/movie-reviews/internal/config"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type Module struct {
 	Handler    *Handler
@@ -8,10 +11,10 @@ type Module struct {
 	Repository *Repository
 }
 
-func NewModule(db *pgxpool.Pool) *Module {
+func NewModule(db *pgxpool.Pool, paginationConfig config.PaginationConfig) *Module {
 	repo := NewRepository(db)
 	service := NewService(repo)
-	handler := NewHandler(service)
+	handler := NewHandler(service, paginationConfig)
 	return &Module{
 		Handler:    handler,
 		Service:    service,
