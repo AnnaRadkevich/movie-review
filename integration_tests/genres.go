@@ -1,4 +1,4 @@
-package integrations_tests
+package tests
 
 import (
 	"net/http"
@@ -59,7 +59,7 @@ func GenresApiChecks(t *testing.T, c *client.Client) {
 		require.NoError(t, err)
 		require.Equal(t, []*contracts.Genre{action, drama, spooky}, genres)
 	})
-	t.Run("genres.GetGenreById: success", func(t *testing.T) {
+	t.Run("genres.GetGenreByID: success", func(t *testing.T) {
 		g, err := c.GetGenreById(action.ID)
 		require.NoError(t, err)
 		require.Equal(t, action, g)
