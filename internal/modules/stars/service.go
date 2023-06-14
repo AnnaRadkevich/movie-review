@@ -16,7 +16,7 @@ func NewService(repo *Repository) *Service {
 	}
 }
 
-func (s *Service) CreateStar(ctx context.Context, star *Star) error {
+func (s *Service) CreateStar(ctx context.Context, star *StarDetails) error {
 	if err := s.repo.CreateStar(ctx, star); err != nil {
 		return err
 	}
@@ -27,15 +27,15 @@ func (s *Service) CreateStar(ctx context.Context, star *Star) error {
 	return nil
 }
 
-func (s *Service) GetStarByID(ctx context.Context, id int) (*Star, error) {
+func (s *Service) GetStarByID(ctx context.Context, id int) (*StarDetails, error) {
 	return s.repo.GetStarByID(ctx, id)
 }
 
-func (s *Service) GetAllStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
+func (s *Service) GetAllStarsPaginated(ctx context.Context, offset int, limit int) ([]*StarDetails, int, error) {
 	return s.repo.GetAllStarsPaginated(ctx, offset, limit)
 }
 
-func (s *Service) UpdateStar(ctx context.Context, star *Star) error {
+func (s *Service) UpdateStar(ctx context.Context, star *StarDetails) error {
 	if err := s.repo.UpdateStar(ctx, star); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (s *Service) DeleteStar(ctx context.Context, id int) error {
 		return err
 	}
 	log.FromContext(ctx).Info(
-		"star updated",
+		"star deleted",
 		"id", id)
 	return nil
 }

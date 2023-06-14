@@ -28,13 +28,15 @@ func (h *Handler) CreateStar(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	star := &Star{
-		FirstName:  req.FirstName,
+	star := &StarDetails{
+		Star: Star{
+			FirstName: req.FirstName,
+			LastName:  req.LastName,
+			BirthDate: req.BirthDate,
+			DeathDate: req.DeathDate,
+		},
 		MiddleName: req.MiddleName,
-		LastName:   req.LastName,
-		BirthDate:  req.BirthDate,
 		BirthPlace: req.BirthPlace,
-		DeathDate:  req.DeathDate,
 		Bio:        req.Bio,
 	}
 	err = h.service.CreateStar(c.Request().Context(), star)
@@ -75,14 +77,16 @@ func (h *Handler) UpdateStar(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	star := &Star{
-		ID:         req.ID,
-		FirstName:  req.FirstName,
+	star := &StarDetails{
+		Star: Star{
+			ID:        req.ID,
+			FirstName: req.FirstName,
+			LastName:  req.LastName,
+			BirthDate: req.BirthDate,
+			DeathDate: req.DeathDate,
+		},
 		MiddleName: req.MiddleName,
-		LastName:   req.LastName,
-		BirthDate:  req.BirthDate,
 		BirthPlace: req.BirthPlace,
-		DeathDate:  req.DeathDate,
 		Bio:        req.Bio,
 	}
 	if err = h.service.UpdateStar(c.Request().Context(), star); err != nil {
