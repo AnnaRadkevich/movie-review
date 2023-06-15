@@ -19,7 +19,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) CreateStar(ctx context.Context, star *Star) error {
+func (r *Repository) CreateStar(ctx context.Context, star *StarDetails) error {
 	queryString := `INSERT INTO stars 
 (first_name, middle_name, last_name, birth_date, birth_place, death_date, bio)
  VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -34,8 +34,8 @@ func (r *Repository) CreateStar(ctx context.Context, star *Star) error {
 	return nil
 }
 
-func (r *Repository) GetStarByID(ctx context.Context, id int) (*Star, error) {
-	var star Star
+func (r *Repository) GetStarByID(ctx context.Context, id int) (*StarDetails, error) {
+	var star StarDetails
 	queryString := `
 	SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at
 	FROM stars
@@ -60,9 +60,9 @@ func (r *Repository) GetStarByID(ctx context.Context, id int) (*Star, error) {
 	return &star, nil
 }
 
-func (r *Repository) GetAllStarsPaginated(ctx context.Context, offset int, limit int) ([]*Star, int, error) {
+func (r *Repository) GetAllStarsPaginated(ctx context.Context, offset int, limit int) ([]*StarDetails, int, error) {
 	b := &pgx.Batch{}
-	b.Queue("SELECT id, first_name, middle_name, last_name, birth_date, birth_place, death_date, bio, created_at, deleted_at FROM stars WHERE deleted_at IS NULL ORDER BY id LIMIT $1 OFFSET $2", limit, offset)
+	b.Queue("SELECT id, first_name, last_name, birth_date, death_date, created_at, deleted_at FROM stars WHERE deleted_at IS NULL ORDER BY id LIMIT $1 OFFSET $2", limit, offset)
 	b.Queue("SELECT COUNT(*) FROM stars WHERE deleted_at IS NULL")
 	br := r.db.SendBatch(ctx, b)
 	defer br.Close()
@@ -73,19 +73,16 @@ func (r *Repository) GetAllStarsPaginated(ctx context.Context, offset int, limit
 	}
 	defer rows.Close()
 
-	var stars []*Star
+	var stars []*StarDetails
 	for rows.Next() {
-		var star Star
+		var star StarDetails
 		if err := rows.
 			Scan(
 				&star.ID,
 				&star.FirstName,
-				&star.MiddleName,
 				&star.LastName,
 				&star.BirthDate,
-				&star.BirthPlace,
 				&star.DeathDate,
-				&star.Bio,
 				&star.CreatedAt,
 				&star.DeletedAt,
 			); err != nil {
@@ -105,7 +102,7 @@ func (r *Repository) GetAllStarsPaginated(ctx context.Context, offset int, limit
 	return stars, total, err
 }
 
-func (r *Repository) UpdateStar(ctx context.Context, star *Star) error {
+func (r *Repository) UpdateStar(ctx context.Context, star *StarDetails) error {
 	n, err := r.db.Exec(ctx, `UPDATE stars 
 			SET first_name = $1, 
 			middle_name = $2, 

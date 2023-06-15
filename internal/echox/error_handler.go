@@ -41,7 +41,7 @@ func toHttpStatus(code apperrors.Code) int {
 		return http.StatusBadRequest
 	case apperrors.NotFoundCode:
 		return http.StatusNotFound
-	case apperrors.AlreadyExistsCode:
+	case apperrors.AlreadyExistsCode, apperrors.VersionMismatchCode:
 		return http.StatusConflict
 	case apperrors.UnauthorizedCode:
 		return http.StatusUnauthorized
