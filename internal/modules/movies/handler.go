@@ -3,6 +3,8 @@ package movies
 import (
 	"net/http"
 
+	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
+
 	"github.com/cloudmachinery/movie-reviews/contracts"
 	"github.com/cloudmachinery/movie-reviews/internal/config"
 	"github.com/cloudmachinery/movie-reviews/internal/echox"
@@ -33,6 +35,9 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 			ReleaseDate: req.ReleaseDate,
 		},
 		Description: req.Description,
+	}
+	for _, genreID := range req.Genres {
+		movie.Genres = append(movie.Genres, &genres.Genre{ID: genreID})
 	}
 	err = h.service.CreateMovie(c.Request().Context(), movie)
 	if err != nil {
@@ -79,6 +84,9 @@ func (h *Handler) UpdateMovie(c echo.Context) error {
 			ReleaseDate: req.ReleaseDate,
 		},
 		Description: req.Description,
+	}
+	for _, genreID := range req.Genres {
+		movie.Genres = append(movie.Genres, &genres.Genre{ID: genreID})
 	}
 	if err = h.service.UpdateMovie(c.Request().Context(), movie); err != nil {
 		return err

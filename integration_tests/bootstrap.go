@@ -60,7 +60,7 @@ func runMigrations(t *testing.T, connString string) {
 	migrator, err := migrate.NewMigrator(context.Background(), conn, "schema_version")
 	require.NoError(t, err)
 
-	err = migrator.LoadMigrations(os.DirFS("../tern/migrations"))
+	err = migrator.LoadMigrations(os.DirFS("tern/migrations"))
 	require.NoError(t, err)
 
 	err = migrator.Migrate(context.Background())

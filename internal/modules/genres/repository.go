@@ -3,6 +3,8 @@ package genres
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
 	"github.com/cloudmachinery/movie-reviews/internal/dbx"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -87,4 +89,60 @@ func (r *Repository) DeleteGenre(ctx context.Context, id int) error {
 		return apperrors.NotFound("genre", "id", id)
 	}
 	return nil
+}
+
+func (r *Repository) GetRelationsByMovieID(ctx context.Context, id int) ([]*MovieGenreRelation, error) {
+	queryString := `SELECT movie_id,genre_id,order_no FROM movie_genres WHERE movie_id = $1`
+	rows, err := r.db.Query(ctx, queryString, id)
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+
+	var relations []*MovieGenreRelation
+	for rows.Next() {
+		var relation MovieGenreRelation
+		err := rows.Scan(
+			&relation.MovieID,
+			&relation.GenreID,
+			&relation.OrderNo)
+		if err != nil {
+			return nil, apperrors.Internal(err)
+		}
+		relations = append(relations, &relation)
+	}
+	return relations, nil
+}
+
+func (r *Repository) GetGenresByMovieID(ctx context.Context, id int) ([]*Genre, error) {
+	queryString := `SELECT g.id, g.name
+	FROM genres g
+	INNER JOIN movie_genres mg on mg.genre_id = g.id	
+	WHERE mg.movie_id = $1
+	ORDER BY mg.order_no`
+	rows, err := r.db.Query(ctx, queryString, id)
+	if err != nil {
+		return nil, apperrors.Internal(err)
+	}
+	genres, err := scanGenres(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return genres, nil
+}
+
+func scanGenres(rows pgx.Rows) ([]*Genre, error) {
+	var genres []*Genre
+	for rows.Next() {
+		var genre Genre
+		err := rows.Scan(
+			&genre.ID,
+			&genre.Name,
+		)
+		if err != nil {
+			return nil, apperrors.Internal(err)
+		}
+		genres = append(genres, &genre)
+	}
+	return genres, nil
 }

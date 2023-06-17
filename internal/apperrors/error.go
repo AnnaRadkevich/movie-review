@@ -63,6 +63,14 @@ func Internal(err error) *Error {
 	return appErr
 }
 
+func EnsureInternal(err error) error {
+	var appErr *Error
+	if !errors.As(err, &appErr) {
+		return Internal(err)
+	}
+	return err
+}
+
 func InternalWithoutStackTrace(err error) *Error {
 	appErr := newHiddenError(err, InternalCode, "internal error")
 	appErr.IncidentId = uuid.New().String()

@@ -26,6 +26,11 @@ func requireBadRequestError(t *testing.T, err error, msg string) {
 	requireApiError(t, err, http.StatusBadRequest, msg)
 }
 
+func requireVersionMismatchError(t *testing.T, err error, subject, key string, value any, version int) {
+	msg := apperrors.VersionMismatch(subject, key, value, version).Error()
+	requireApiError(t, err, http.StatusConflict, msg)
+}
+
 func requireAlreadyExistError(t *testing.T, err error, subject, key string, value any) {
 	msg := apperrors.AlreadyExists(subject, key, value).Error()
 	requireApiError(t, err, http.StatusConflict, msg)
