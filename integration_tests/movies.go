@@ -21,6 +21,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 					Title:       "Star Wars",
 					Description: "Star Wars is an American epic space opera",
 					ReleaseDate: time.Date(1977, time.May, 25, 0, 0, 0, 0, time.UTC),
+					Genres:      []int{Action.ID, Drama.ID},
 				},
 				addr: &starWars,
 			},
@@ -31,6 +32,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 						" from a screenplay by Steve Kloves, based on the 1997 novel of the same name by J. K. Rowling." +
 						" It is the first installment in the Harry Potter film series. ",
 					ReleaseDate: time.Date(2001, time.November, 4, 0, 0, 0, 0, time.UTC),
+					Genres:      []int{Action.ID},
 				},
 				addr: &harryPotter,
 			},
@@ -40,6 +42,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 					Description: "The Lord of the Rings is a series of three epic fantasy adventure films directed by Peter Jackson," +
 						" based on the novel The Lord of the Rings by J. R. R. Tolkien",
 					ReleaseDate: time.Date(2001, time.December, 10, 0, 0, 0, 0, time.UTC),
+					Genres:      []int{Drama.ID},
 				},
 				addr: &lordOfTheRing,
 			},
@@ -53,6 +56,8 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 			*cc.addr = movie
 			require.NotEmpty(t, movie.ID)
 			require.NotEmpty(t, movie.CreatedAt)
+			require.NotEmpty(t, movie.Genres)
+			require.Equal(t, len(cc.req.Genres), len(movie.Genres))
 		}
 	})
 
@@ -60,6 +65,10 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 		movie, err := c.GetMovieByID(harryPotter.ID)
 		require.NoError(t, err)
 		require.Equal(t, movie.ID, harryPotter.ID)
+		require.Equal(t, len(harryPotter.Genres), len(movie.Genres))
+		for i, genre := range harryPotter.Genres {
+			require.Equal(t, *genre, *movie.Genres[i])
+		}
 	})
 	t.Run("movies.GetMovieByID: not found", func(t *testing.T) {
 		notExistingId := 10
@@ -86,7 +95,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 		require.Equal(t, testPaginationSize, res.Size)
 		require.Equal(t, []*contracts.Movie{&lordOfTheRing.Movie}, res.Items)
 	})
-	t.Run("stars.UpdateMovie: success", func(t *testing.T) {
+	t.Run("movies.UpdateMovie: success", func(t *testing.T) {
 		req := &contracts.UpdateMovieRequest{
 			ID:          harryPotter.ID,
 			Title:       "Harry Potter and the Philosopher's Stone",
@@ -94,15 +103,21 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 			Description: "is a 2001 fantasy film directed by Chris Columbus and produced by David Heyman," +
 				" from a screenplay by Steve Kloves, based on the 1997 novel of the same name by J. K. Rowling." +
 				" It is the first installment in the Harry Potter film series. ",
+			Genres: []int{Action.ID, Drama.ID},
 		}
 		err := c.UpdateMovie(contracts.NewAuthenticated(req, johnDoeToken))
 		require.NoError(t, err)
 
+		err = c.UpdateMovie(contracts.NewAuthenticated(req, johnDoeToken))
+		requireVersionMismatchError(t, err, "movie", "id", req.ID, req.Version)
+
 		res, err := c.GetMovieByID(harryPotter.ID)
 		require.NoError(t, err)
 		require.Equal(t, req.Title, res.Title)
+		require.Equal(t, []*contracts.Genre{Action, Drama}, res.Genres)
+		require.Equal(t, 1, res.Version)
 	})
-	t.Run("stars.UpdateMovie: not found", func(t *testing.T) {
+	t.Run("movies.UpdateMovie: not found", func(t *testing.T) {
 		notExistingId := 10
 		req := &contracts.UpdateMovieRequest{
 			ID:          notExistingId,
@@ -113,7 +128,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 		err := c.UpdateMovie(contracts.NewAuthenticated(req, johnDoeToken))
 		requireNotFoundError(t, err, "movie", "id", notExistingId)
 	})
-	t.Run("stars.DeleteMovie: not found", func(t *testing.T) {
+	t.Run("movies.DeleteMovie: not found", func(t *testing.T) {
 		notExistingId := 10
 		req := &contracts.GetOrDeleteMovieByIDRequest{
 			ID: notExistingId,
@@ -121,7 +136,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 		err := c.DeleteMovie(contracts.NewAuthenticated(req, johnDoeToken))
 		requireNotFoundError(t, err, "movie", "id", notExistingId)
 	})
-	t.Run("stars.DeleteMOvie: success", func(t *testing.T) {
+	t.Run("movies.DeleteMovie: success", func(t *testing.T) {
 		req := &contracts.GetOrDeleteMovieByIDRequest{
 			ID: harryPotter.ID,
 		}

@@ -3,16 +3,20 @@ package movies
 import (
 	"context"
 
+	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
+
 	"github.com/cloudmachinery/movie-reviews/internal/log"
 )
 
 type Service struct {
-	repo *Repository
+	repo          *Repository
+	genresService *genres.Service
 }
 
-func NewService(repo *Repository) *Service {
+func NewService(repo *Repository, genresService *genres.Service) *Service {
 	return &Service{
-		repo: repo,
+		repo:          repo,
+		genresService: genresService,
 	}
 }
 
@@ -24,11 +28,16 @@ func (s *Service) CreateMovie(ctx context.Context, movie *MovieDetails) error {
 		"movie created",
 		"movie title", movie.Title,
 		"movie release date", movie.ReleaseDate)
-	return nil
+	return s.assemble(ctx, movie)
 }
 
 func (s *Service) GetMovieByID(ctx context.Context, id int) (*MovieDetails, error) {
-	return s.repo.GetMovieByID(ctx, id)
+	m, err := s.repo.GetMovieByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	err = s.assemble(ctx, m)
+	return m, err
 }
 
 func (s *Service) GetAllMoviesPaginated(ctx context.Context, offset int, limit int) ([]*MovieDetails, int, error) {
@@ -53,4 +62,10 @@ func (s *Service) DeleteMovie(ctx context.Context, id int) error {
 		"movie deleted",
 		"id", id)
 	return nil
+}
+
+func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
+	var err error
+	movie.Genres, err = s.genresService.GetGenreByMovieID(ctx, movie.ID)
+	return err
 }

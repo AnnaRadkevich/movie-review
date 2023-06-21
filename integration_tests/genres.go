@@ -9,6 +9,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	Action *contracts.Genre
+	Drama  *contracts.Genre
+	Spooky *contracts.Genre
+)
+
 func GenresApiChecks(t *testing.T, c *client.Client) {
 	t.Run("genres.GetAllGenres: empty", func(t *testing.T) {
 		genres, err := c.GetAllGenres()
@@ -16,16 +22,15 @@ func GenresApiChecks(t *testing.T, c *client.Client) {
 		require.Empty(t, genres)
 	})
 
-	var action, drama, spooky *contracts.Genre
 	t.Run("genres.CreateGenre: success Action by Admin, Drama and Spooky by John Doe", func(t *testing.T) {
 		cases := []struct {
 			name  string
 			token string
 			addr  **contracts.Genre
 		}{
-			{"Action", adminToken, &action},
-			{"Drama", johnDoeToken, &drama},
-			{"Spooky", johnDoeToken, &spooky},
+			{"Action", adminToken, &Action},
+			{"Drama", johnDoeToken, &Drama},
+			{"Spooky", johnDoeToken, &Spooky},
 		}
 
 		for _, cc := range cases {
@@ -49,7 +54,7 @@ func GenresApiChecks(t *testing.T, c *client.Client) {
 	})
 	t.Run("genres:CreateGenre: existing name", func(t *testing.T) {
 		req := &contracts.CreateGenreRequest{
-			Name: drama.Name,
+			Name: Drama.Name,
 		}
 		_, err := c.CreateGenre(contracts.NewAuthenticated(req, johnDoeToken))
 		requireAlreadyExistError(t, err, "genre", "name", req.Name)
@@ -57,12 +62,12 @@ func GenresApiChecks(t *testing.T, c *client.Client) {
 	t.Run("genres.GetAllGenres: three genres", func(t *testing.T) {
 		genres, err := c.GetAllGenres()
 		require.NoError(t, err)
-		require.Equal(t, []*contracts.Genre{action, drama, spooky}, genres)
+		require.Equal(t, []*contracts.Genre{Action, Drama, Spooky}, genres)
 	})
 	t.Run("genres.GetGenreByID: success", func(t *testing.T) {
-		g, err := c.GetGenreById(action.ID)
+		g, err := c.GetGenreById(Action.ID)
 		require.NoError(t, err)
-		require.Equal(t, action, g)
+		require.Equal(t, Action, g)
 	})
 	t.Run("genres.GetGetGenreById: not found", func(t *testing.T) {
 		_, err := c.GetGenreById(10)
@@ -70,14 +75,14 @@ func GenresApiChecks(t *testing.T, c *client.Client) {
 	})
 	t.Run("genres.UpdateGenre: success", func(t *testing.T) {
 		req := &contracts.UpdateGenreRequest{
-			GenreId: spooky.ID,
+			GenreId: Spooky.ID,
 			Name:    "Horror",
 		}
 		err := c.UpdateGenre(contracts.NewAuthenticated(req, johnDoeToken))
 		require.NoError(t, err)
 
-		spooky = getGenre(t, c, spooky.ID)
-		require.Equal(t, req.Name, spooky.Name)
+		Spooky = getGenre(t, c, Spooky.ID)
+		require.Equal(t, req.Name, Spooky.Name)
 	})
 
 	t.Run("genres.UpdateGenre: not found", func(t *testing.T) {
@@ -91,13 +96,13 @@ func GenresApiChecks(t *testing.T, c *client.Client) {
 	})
 	t.Run("genres.DeleteGenre: success", func(t *testing.T) {
 		req := &contracts.DeleteGenreRequest{
-			GenreId: spooky.ID,
+			GenreId: Spooky.ID,
 		}
 		err := c.DeleteGenre(contracts.NewAuthenticated(req, johnDoeToken))
 		require.NoError(t, err)
 
-		spooky = getGenre(t, c, spooky.ID)
-		require.Nil(t, spooky)
+		Spooky = getGenre(t, c, Spooky.ID)
+		require.Nil(t, Spooky)
 	})
 }
 
