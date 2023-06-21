@@ -3,6 +3,8 @@ package movies
 import (
 	"context"
 
+	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
 	"github.com/cloudmachinery/movie-reviews/internal/slices"
 
@@ -15,12 +17,14 @@ import (
 type Repository struct {
 	db               *pgxpool.Pool
 	genresRepository *genres.Repository
+	starsRepository  *stars.Repository
 }
 
-func NewRepository(db *pgxpool.Pool, genresRepository *genres.Repository) *Repository {
+func NewRepository(db *pgxpool.Pool, genresRepository *genres.Repository, starsRepository *stars.Repository) *Repository {
 	return &Repository{
 		db:               db,
 		genresRepository: genresRepository,
+		starsRepository:  starsRepository,
 	}
 }
 
@@ -45,7 +49,21 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 				OrderNo: i,
 			}
 		})
-		return r.UpdateGenres(ctx, []*genres.MovieGenreRelation{}, nextGenres)
+		if err = r.UpdateGenres(ctx, []*genres.MovieGenreRelation{}, nextGenres); err != nil {
+			return err
+		}
+
+		// Insert cast
+		nextCast := slices.MapIndex(movie.Cast, func(i int, c *stars.MovieCredit) *stars.MovieStarRelation {
+			return &stars.MovieStarRelation{
+				MovieID: movie.ID,
+				StarID:  c.Star.ID,
+				Role:    c.Role,
+				Details: c.Details,
+				OrderNo: i,
+			}
+		})
+		return r.UpdateCast(ctx, nil, nextCast)
 	})
 	if err != nil {
 		return apperrors.Internal(err)
@@ -150,7 +168,28 @@ func (r *Repository) UpdateMovie(ctx context.Context, movie *MovieDetails) error
 			}
 		})
 
-		return r.UpdateGenres(ctx, currentGenres, nextGenres)
+		err = r.UpdateGenres(ctx, currentGenres, nextGenres)
+		if err != nil {
+			return err
+		}
+		currentCast, err := r.starsRepository.GetRelationsByMovieID(ctx, movie.ID)
+		if err != nil {
+			return err
+		}
+		nextCast := slices.MapIndex(movie.Cast, func(i int, c *stars.MovieCredit) *stars.MovieStarRelation {
+			return &stars.MovieStarRelation{
+				MovieID: movie.ID,
+				StarID:  c.Star.ID,
+				Role:    c.Role,
+				Details: c.Details,
+				OrderNo: i,
+			}
+		})
+		if err != nil {
+			return err
+		}
+
+		return r.UpdateCast(ctx, currentCast, nextCast)
 	})
 	if err != nil {
 		return apperrors.EnsureInternal(err)
@@ -173,7 +212,15 @@ func (r *Repository) DeleteMovie(ctx context.Context, id int) error {
 		if err != nil {
 			return err
 		}
-		return r.UpdateGenres(ctx, current, []*genres.MovieGenreRelation{})
+		err = r.UpdateGenres(ctx, current, []*genres.MovieGenreRelation{})
+		if err != nil {
+			return err
+		}
+		currentCast, err := r.starsRepository.GetRelationsByMovieID(ctx, id)
+		if err != nil {
+			return err
+		}
+		return r.UpdateCast(ctx, currentCast, []*stars.MovieStarRelation{})
 	})
 	if err != nil {
 		return apperrors.EnsureInternal(err)
@@ -192,6 +239,33 @@ func (r *Repository) UpdateGenres(ctx context.Context, current, next []*genres.M
 	removeFunc := func(mgo *genres.MovieGenreRelation) error {
 		_, err := q.Exec(ctx, `DELETE FROM movie_genres WHERE movie_id = $1 and genre_id = $2`,
 			mgo.MovieID, mgo.GenreID)
+		return err
+	}
+	return dbx.AdjustRelations(current, next, addFunc, removeFunc)
+}
+
+func (r *Repository) UpdateCast(ctx context.Context, current, next []*stars.MovieStarRelation) error {
+	q := dbx.FromContext(ctx, r.db)
+	addFunc := func(msr *stars.MovieStarRelation) error {
+		_, err := q.Exec(ctx, `INSERT INTO movie_stars (movie_id, star_id, role, details, order_no) 
+				VALUES ($1, $2, $3, $4, $5)`,
+			msr.MovieID,
+			msr.StarID,
+			msr.Role,
+			msr.Details,
+			msr.OrderNo,
+		)
+		return err
+	}
+	removeFunc := func(msr *stars.MovieStarRelation) error {
+		_, err := q.Exec(ctx, `DELETE FROM movie_stars 
+				WHERE movie_id = $1 
+				AND star_id = $2 
+				AND role = $3`,
+			msr.MovieID,
+			msr.StarID,
+			msr.Role,
+		)
 		return err
 	}
 	return dbx.AdjustRelations(current, next, addFunc, removeFunc)

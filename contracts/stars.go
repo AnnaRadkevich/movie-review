@@ -1,6 +1,9 @@
 package contracts
 
-import "time"
+import (
+	"strconv"
+	"time"
+)
 
 type Star struct {
 	ID        int        `json:"id"`
@@ -34,7 +37,17 @@ type GetOrDeleteStarByIDRequest struct {
 
 type GetStarsRequest struct {
 	PaginatedRequest
+	MovieID *int `query:"movieId"`
 }
+
+func (r *GetStarsRequest) ToQueryParams() map[string]string {
+	params := r.PaginatedRequest.ToQueryParams()
+	if r.MovieID != nil {
+		params["movieId"] = strconv.Itoa(*r.MovieID)
+	}
+	return params
+}
+
 type GetStarsResponse = PaginatedResponse[StarDetails]
 
 type UpdateStarRequest struct {

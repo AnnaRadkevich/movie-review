@@ -3,6 +3,8 @@ package movies
 import (
 	"time"
 
+	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
 )
 
@@ -16,7 +18,8 @@ type Movie struct {
 
 type MovieDetails struct {
 	Movie
-	Description string          `json:"description"`
-	Version     int             `json:"version"`
-	Genres      []*genres.Genre `json:"genres"`
+	Description string               `json:"description"`
+	Version     int                  `json:"version"`
+	Genres      []*genres.Genre      `json:"genres"`
+	Cast        []*stars.MovieCredit `json:"cast"`
 }

@@ -3,6 +3,8 @@ package movies
 import (
 	"net/http"
 
+	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
 
 	"github.com/cloudmachinery/movie-reviews/contracts"
@@ -38,6 +40,15 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 	}
 	for _, genreID := range req.Genres {
 		movie.Genres = append(movie.Genres, &genres.Genre{ID: genreID})
+	}
+	for _, creditID := range req.Cast {
+		movie.Cast = append(movie.Cast, &stars.MovieCredit{
+			Star: stars.Star{
+				ID: creditID.StarID,
+			},
+			Role:    creditID.Role,
+			Details: creditID.Details,
+		})
 	}
 	err = h.service.CreateMovie(c.Request().Context(), movie)
 	if err != nil {
@@ -87,6 +98,15 @@ func (h *Handler) UpdateMovie(c echo.Context) error {
 	}
 	for _, genreID := range req.Genres {
 		movie.Genres = append(movie.Genres, &genres.Genre{ID: genreID})
+	}
+	for _, creditID := range req.Cast {
+		movie.Cast = append(movie.Cast, &stars.MovieCredit{
+			Star: stars.Star{
+				ID: creditID.StarID,
+			},
+			Role:    creditID.Role,
+			Details: creditID.Details,
+		})
 	}
 	if err = h.service.UpdateMovie(c.Request().Context(), movie); err != nil {
 		return err

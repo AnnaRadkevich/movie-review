@@ -3,6 +3,8 @@ package movies
 import (
 	"context"
 
+	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
 
 	"github.com/cloudmachinery/movie-reviews/internal/log"
@@ -11,12 +13,14 @@ import (
 type Service struct {
 	repo          *Repository
 	genresService *genres.Service
+	starService   *stars.Service
 }
 
-func NewService(repo *Repository, genresService *genres.Service) *Service {
+func NewService(repo *Repository, genresService *genres.Service, starService *stars.Service) *Service {
 	return &Service{
 		repo:          repo,
 		genresService: genresService,
+		starService:   starService,
 	}
 }
 
@@ -66,6 +70,11 @@ func (s *Service) DeleteMovie(ctx context.Context, id int) error {
 
 func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
 	var err error
-	movie.Genres, err = s.genresService.GetGenreByMovieID(ctx, movie.ID)
+	if movie.Genres, err = s.genresService.GetGenreByMovieID(ctx, movie.ID); err != nil {
+		return err
+	}
+	if movie.Cast, err = s.starService.GetCastByMovieID(ctx, movie.ID); err != nil {
+		return err
+	}
 	return err
 }
