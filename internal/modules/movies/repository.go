@@ -87,11 +87,43 @@ func (r *Repository) GetMovieByID(ctx context.Context, id int) (*MovieDetails, e
 	return &movie, nil
 }
 
-func (r *Repository) GetAllMoviesPaginated(ctx context.Context, offset int, limit int) ([]*MovieDetails, int, error) {
+func (r *Repository) GetAllMoviesPaginated(ctx context.Context, searchTerm *string, starID *int, offset int, limit int) ([]*MovieDetails, int, error) {
+	selectQuery := dbx.StatementBuilder.
+		Select("id,title,release_date,created_at,deleted_at").
+		From("movies").
+		Where("deleted_at IS NULL").
+		OrderBy("id").
+		Limit(uint64(limit)).
+		Offset(uint64(offset))
+	queryTotal := dbx.StatementBuilder.
+		Select("COUNT(*)").
+		From("movies").
+		Where("deleted_at IS NULL")
+
+	if starID != nil {
+		selectQuery = selectQuery.
+			Join("movie_stars on movies.id = movie_stars.movie_id").
+			Where("star_id = ?", starID)
+
+		queryTotal = queryTotal.
+			Join("movie_stars on movies.id = movie_stars.movie_id").
+			Where("star_id = ?", starID)
+	}
+	if searchTerm != nil {
+		selectQuery = selectQuery.
+			Where("search_vector @@ to_tsquery('english', ?)", *searchTerm).
+			OrderByClause("ts_rank_cd(search_vector, to_tsquery('english', ?)) DESC", *searchTerm)
+
+		queryTotal = queryTotal.
+			Where("search_vector @@ to_tsquery('english', ?)", *searchTerm)
+	}
 	b := &pgx.Batch{}
-	b.Queue(`SELECT id,title,release_date,created_at,deleted_at FROM movies
-		WHERE deleted_at IS NULL ORDER BY id LIMIT $1 OFFSET $2`, limit, offset)
-	b.Queue(`SELECT COUNT(*) FROM movies WHERE deleted_at IS NULL`)
+	if err := dbx.QueueBatchSelect(b, selectQuery); err != nil {
+		return nil, 0, err
+	}
+	if err := dbx.QueueBatchSelect(b, queryTotal); err != nil {
+		return nil, 0, err
+	}
 	br := r.db.SendBatch(ctx, b)
 	defer br.Close()
 
