@@ -22,6 +22,17 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 					Description: "Star Wars is an American epic space opera",
 					ReleaseDate: time.Date(1977, time.May, 25, 0, 0, 0, 0, time.UTC),
 					Genres:      []int{Action.ID, Drama.ID},
+					Cast: []*contracts.MovieCreditInfo{
+						{
+							StarID: mcgregor.ID,
+							Role:   "director",
+						},
+						{
+							StarID:  hamill.ID,
+							Role:    "actor",
+							Details: contracts.Ptr("char1, char2"),
+						},
+					},
 				},
 				addr: &starWars,
 			},
@@ -33,6 +44,13 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 						" It is the first installment in the Harry Potter film series. ",
 					ReleaseDate: time.Date(2001, time.November, 4, 0, 0, 0, 0, time.UTC),
 					Genres:      []int{Action.ID},
+					Cast: []*contracts.MovieCreditInfo{
+						{
+							StarID:  hamill.ID,
+							Role:    "actor",
+							Details: contracts.Ptr("char3"),
+						},
+					},
 				},
 				addr: &harryPotter,
 			},
@@ -43,6 +61,13 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 						" based on the novel The Lord of the Rings by J. R. R. Tolkien",
 					ReleaseDate: time.Date(2001, time.December, 10, 0, 0, 0, 0, time.UTC),
 					Genres:      []int{Drama.ID},
+					Cast: []*contracts.MovieCreditInfo{
+						{
+							StarID:  hamill.ID,
+							Role:    "actor",
+							Details: contracts.Ptr("char4"),
+						},
+					},
 				},
 				addr: &lordOfTheRing,
 			},
@@ -58,6 +83,8 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 			require.NotEmpty(t, movie.CreatedAt)
 			require.NotEmpty(t, movie.Genres)
 			require.Equal(t, len(cc.req.Genres), len(movie.Genres))
+			require.NotEmpty(t, movie.Cast)
+			require.Equal(t, len(cc.req.Cast), len(movie.Cast))
 		}
 	})
 
@@ -68,6 +95,10 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 		require.Equal(t, len(harryPotter.Genres), len(movie.Genres))
 		for i, genre := range harryPotter.Genres {
 			require.Equal(t, *genre, *movie.Genres[i])
+		}
+		require.Equal(t, len(harryPotter.Cast), len(movie.Cast))
+		for i, cast := range harryPotter.Cast {
+			require.Equal(t, *cast, *movie.Cast[i])
 		}
 	})
 	t.Run("movies.GetMovieByID: not found", func(t *testing.T) {
@@ -95,6 +126,17 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 		require.Equal(t, testPaginationSize, res.Size)
 		require.Equal(t, []*contracts.Movie{&lordOfTheRing.Movie}, res.Items)
 	})
+	t.Run("stars.GetAllStars: by movieId success", func(t *testing.T) {
+		req := contracts.GetStarsRequest{
+			MovieID: contracts.Ptr(lordOfTheRing.ID),
+		}
+		res, err := c.GetStars(&req)
+		require.NoError(t, err)
+		require.Equal(t, len(lordOfTheRing.Cast), res.Total)
+		require.Equal(t, 1, res.Page)
+		require.Equal(t, testPaginationSize, res.Size)
+		require.Equal(t, []*contracts.Star{&hamill.Star}, res.Items)
+	})
 	t.Run("movies.UpdateMovie: success", func(t *testing.T) {
 		req := &contracts.UpdateMovieRequest{
 			ID:          harryPotter.ID,
@@ -104,6 +146,16 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 				" from a screenplay by Steve Kloves, based on the 1997 novel of the same name by J. K. Rowling." +
 				" It is the first installment in the Harry Potter film series. ",
 			Genres: []int{Action.ID, Drama.ID},
+			Cast: []*contracts.MovieCreditInfo{
+				{
+					StarID: mcgregor.ID,
+					Role:   "producer",
+				},
+				{
+					StarID: hamill.ID,
+					Role:   "director",
+				},
+			},
 		}
 		err := c.UpdateMovie(contracts.NewAuthenticated(req, johnDoeToken))
 		require.NoError(t, err)
@@ -116,6 +168,14 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 		require.Equal(t, req.Title, res.Title)
 		require.Equal(t, []*contracts.Genre{Action, Drama}, res.Genres)
 		require.Equal(t, 1, res.Version)
+		for i, credit := range req.Cast {
+			require.Equal(t, credit.StarID, res.Cast[i].Star.ID)
+			require.NotNil(t, res.Cast[i].Star.FirstName)
+			require.NotNil(t, res.Cast[i].Star.LastName)
+			require.Equal(t, credit.Role, req.Cast[i].Role)
+			require.Equal(t, credit.Details, res.Cast[i].Details)
+
+		}
 	})
 	t.Run("movies.UpdateMovie: not found", func(t *testing.T) {
 		notExistingId := 10

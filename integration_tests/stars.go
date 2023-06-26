@@ -9,9 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func StarsApiChecks(t *testing.T, c *client.Client) {
-	var lucas, hamill, mcgregor *contracts.StarDetails
+var (
+	lucas    *contracts.StarDetails
+	hamill   *contracts.StarDetails
+	mcgregor *contracts.StarDetails
+)
 
+func StarsApiChecks(t *testing.T, c *client.Client) {
 	t.Run("stars.CreateStar: success", func(t *testing.T) {
 		cases := []struct {
 			req  *contracts.CreateStarRequest

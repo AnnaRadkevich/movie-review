@@ -31,8 +31,8 @@ func (s *Service) GetStarByID(ctx context.Context, id int) (*StarDetails, error)
 	return s.repo.GetStarByID(ctx, id)
 }
 
-func (s *Service) GetAllStarsPaginated(ctx context.Context, offset int, limit int) ([]*StarDetails, int, error) {
-	return s.repo.GetAllStarsPaginated(ctx, offset, limit)
+func (s *Service) GetAllStarsPaginated(ctx context.Context, movieID *int, offset int, limit int) ([]*StarDetails, int, error) {
+	return s.repo.GetAllStarsPaginated(ctx, movieID, offset, limit)
 }
 
 func (s *Service) UpdateStar(ctx context.Context, star *StarDetails) error {
@@ -53,4 +53,8 @@ func (s *Service) DeleteStar(ctx context.Context, id int) error {
 		"star deleted",
 		"id", id)
 	return nil
+}
+
+func (s *Service) GetCastByMovieID(ctx context.Context, movieID int) ([]*MovieCredit, error) {
+	return s.repo.GetCastByMovieID(ctx, movieID)
 }
