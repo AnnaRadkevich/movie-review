@@ -76,7 +76,7 @@ func (h *Handler) GetAllMovies(c echo.Context) error {
 	}
 	pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
 	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
-	movies, total, err := h.service.GetAllMoviesPaginated(c.Request().Context(), offset, limit)
+	movies, total, err := h.service.GetAllMoviesPaginated(c.Request().Context(), req.SearchTerm, req.StarID, offset, limit)
 	if err != nil {
 		return err
 	}

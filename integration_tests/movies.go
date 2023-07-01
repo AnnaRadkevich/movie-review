@@ -38,7 +38,7 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 			},
 			{
 				req: &contracts.CreateMovieRequest{
-					Title: "Harry Poster and the Philosopher's Stone",
+					Title: "Harry Potter and the Philosopher's Stone",
 					Description: "is a 2001 fantasy film directed by Chris Columbus and produced by David Heyman," +
 						" from a screenplay by Steve Kloves, based on the 1997 novel of the same name by J. K. Rowling." +
 						" It is the first installment in the Harry Potter film series. ",
@@ -136,6 +136,18 @@ func moviesAPIChecks(t *testing.T, c *client.Client) {
 		require.Equal(t, 1, res.Page)
 		require.Equal(t, testPaginationSize, res.Size)
 		require.Equal(t, []*contracts.Star{&hamill.Star}, res.Items)
+	})
+	t.Run("stars.GetMovies: about Kloves ", func(t *testing.T) {
+		req := &contracts.GetMoviesRequest{
+			SearchTerm: contracts.Ptr("Produce"),
+		}
+		res, err := c.GetMovies(req)
+		require.NoError(t, err)
+
+		require.Equal(t, 1, res.Total)
+		require.Equal(t, 1, res.Page)
+		require.Equal(t, testPaginationSize, res.Size)
+		require.Equal(t, []*contracts.Movie{&harryPotter.Movie}, res.Items)
 	})
 	t.Run("movies.UpdateMovie: success", func(t *testing.T) {
 		req := &contracts.UpdateMovieRequest{
