@@ -7,6 +7,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/cloudmachinery/movie-reviews/internal/modules/reviews"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/movies"
 
 	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
@@ -61,6 +63,7 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	genresModule := genres.NewModule(db)
 	starsModule := stars.NewModule(db, cfg.Pagination)
 	moviesModule := movies.NewModule(db, cfg.Pagination, genresModule, starsModule)
+	reviewsModule := reviews.NewModule(db, cfg.Pagination)
 
 	if err = createInitialAdminUser(cfg.Admin, authModule.Service); err != nil {
 		return nil, withClosers(closers, fmt.Errorf("create initial admin user: %w", err))
@@ -108,6 +111,13 @@ func New(ctx context.Context, cfg *config.Config) (*Server, error) {
 	api.POST("/movies", moviesModule.Handler.CreateMovie, auth.Editor)
 	api.PUT("/movies/:id", moviesModule.Handler.UpdateMovie, auth.Editor)
 	api.DELETE("/movies/:id", moviesModule.Handler.DeleteMovie, auth.Editor)
+
+	// Reviews API routes
+	api.GET("/reviews", reviewsModule.Handler.GetAllReviewsPaginated)
+	api.GET("/reviews/:reviewId", reviewsModule.Handler.GetReviewByID)
+	api.POST("/users/:userId/reviews", reviewsModule.Handler.CreateReview, auth.Self)
+	api.PUT("/users/:userId/reviews/:reviewId", reviewsModule.Handler.UpdateReview, auth.Self)
+	api.DELETE("/users/:userId/reviews/:reviewId", reviewsModule.Handler.DeleteReview, auth.Self)
 
 	return &Server{e: e, cfg: cfg, closers: closers}, nil
 }
