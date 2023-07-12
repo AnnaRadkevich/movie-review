@@ -3,6 +3,8 @@ package stars
 import (
 	"net/http"
 
+	"golang.org/x/sync/singleflight"
+
 	"github.com/cloudmachinery/movie-reviews/internal/config"
 	"github.com/cloudmachinery/movie-reviews/internal/pagination"
 
@@ -14,6 +16,7 @@ import (
 type Handler struct {
 	service          *Service
 	paginationConfig config.PaginationConfig
+	reqGroup         singleflight.Group
 }
 
 func NewHandler(service *Service, paginationConfig config.PaginationConfig) *Handler {
@@ -47,29 +50,41 @@ func (h *Handler) CreateStar(c echo.Context) error {
 }
 
 func (h *Handler) GetStarByID(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetOrDeleteStarByIDRequest](c)
+	res, err, _ := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[contracts.GetOrDeleteStarByIDRequest](c)
+		if err != nil {
+			return nil, err
+		}
+		star, err := h.service.GetStarByID(c.Request().Context(), req.ID)
+		if err != nil {
+			return nil, err
+		}
+		return star, nil
+	})
 	if err != nil {
 		return err
 	}
-	star, err := h.service.GetStarByID(c.Request().Context(), req.ID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, star)
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetAllStars(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetStarsRequest](c)
+	res, err, _ := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[contracts.GetStarsRequest](c)
+		if err != nil {
+			return nil, err
+		}
+		pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
+		offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
+		stars, total, err := h.service.GetAllStarsPaginated(c.Request().Context(), req.MovieID, offset, limit)
+		if err != nil {
+			return nil, err
+		}
+		return pagination.Response(&req.PaginatedRequest, total, stars), nil
+	})
 	if err != nil {
 		return err
 	}
-	pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
-	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
-	stars, total, err := h.service.GetAllStarsPaginated(c.Request().Context(), req.MovieID, offset, limit)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, pagination.Response(&req.PaginatedRequest, total, stars))
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) UpdateStar(c echo.Context) error {

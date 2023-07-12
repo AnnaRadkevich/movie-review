@@ -151,6 +151,28 @@ func reviewsAPIChecks(t *testing.T, c *client.Client) {
 		err := c.UpdateReview(contracts.NewAuthenticated(req, reviewer1Token))
 		requireForbiddenError(t, err, "insufficient permissions")
 	})
+	t.Run("movies.GetMovies: return average rating", func(t *testing.T) {
+		res, err := c.GetMovies(&contracts.GetMoviesRequest{})
+		require.NoError(t, err)
+
+		for _, movie := range res.Items {
+			switch movie.ID {
+			case starWars.ID:
+				requireRatingEqual(t, 8.5, *movie.AvgRating)
+			case lordOfTheRing.ID:
+				requireRatingEqual(t, 10, *movie.AvgRating)
+			}
+		}
+	})
+	t.Run("movies.GetMovies: sort by rating DESC ", func(t *testing.T) {
+		res, err := c.GetMovies(&contracts.GetMoviesRequest{
+			SortByRating: contracts.Ptr("desc"),
+		})
+		require.NoError(t, err)
+
+		requireRatingEqual(t, 10, *res.Items[0].AvgRating)
+		requireRatingEqual(t, 8.5, *res.Items[1].AvgRating)
+	})
 	t.Run("reviews.DeleteReview: not found", func(t *testing.T) {
 		nonExistingID := 10000
 		req := &contracts.DeleteReviewRequest{
@@ -190,4 +212,9 @@ func getReview(t *testing.T, c *client.Client, reviewID int) *contracts.Review {
 		return nil
 	}
 	return review
+}
+
+func requireRatingEqual(t *testing.T, expected, actual float64) {
+	const insignificantDelta = 0.01
+	require.InDelta(t, expected, actual, insignificantDelta)
 }

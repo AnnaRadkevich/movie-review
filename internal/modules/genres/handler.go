@@ -3,13 +3,16 @@ package genres
 import (
 	"net/http"
 
+	"golang.org/x/sync/singleflight"
+
 	"github.com/cloudmachinery/movie-reviews/contracts"
 	"github.com/cloudmachinery/movie-reviews/internal/echox"
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
-	service *Service
+	service  *Service
+	reqGroup singleflight.Group
 }
 
 func NewHandler(service *Service) *Handler {
@@ -17,12 +20,18 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) GetAllGenres(c echo.Context) error {
-	genres, err := h.service.GetAllGenres(c.Request().Context())
+	res, err, _ := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		genres, err := h.service.GetAllGenres(c.Request().Context())
+		if err != nil {
+			return nil, err
+		}
+
+		return genres, nil
+	})
 	if err != nil {
 		return err
 	}
-
-	return c.JSON(http.StatusOK, genres)
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetGenreByID(c echo.Context) error {
