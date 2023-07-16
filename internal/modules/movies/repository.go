@@ -73,10 +73,10 @@ func (r *Repository) CreateMovie(ctx context.Context, movie *MovieDetails) error
 
 func (r *Repository) GetMovieByID(ctx context.Context, id int) (*MovieDetails, error) {
 	var movie MovieDetails
-	queryString := `SELECT id,title,release_date,created_at,deleted_at,description,version
+	queryString := `SELECT id,title,release_date,avg_rating,created_at,deleted_at,description,version
  FROM movies WHERE id=$1 AND deleted_at IS NULL;`
 	row := r.db.QueryRow(ctx, queryString, id)
-	err := row.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate,
+	err := row.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.AvgRating,
 		&movie.CreatedAt, &movie.DeletedAt, &movie.Description, &movie.Version)
 	if dbx.IsNoRows(err) {
 		return nil, apperrors.NotFound("movie", "id", id)
@@ -87,12 +87,11 @@ func (r *Repository) GetMovieByID(ctx context.Context, id int) (*MovieDetails, e
 	return &movie, nil
 }
 
-func (r *Repository) GetAllMoviesPaginated(ctx context.Context, searchTerm *string, starID *int, offset int, limit int) ([]*MovieDetails, int, error) {
+func (r *Repository) GetAllMoviesPaginated(ctx context.Context, searchTerm *string, sortByRating *string, starID *int, offset int, limit int) ([]*MovieDetails, int, error) {
 	selectQuery := dbx.StatementBuilder.
-		Select("id,title,release_date,created_at,deleted_at").
+		Select("id,title,release_date,avg_rating,created_at,deleted_at").
 		From("movies").
 		Where("deleted_at IS NULL").
-		OrderBy("id").
 		Limit(uint64(limit)).
 		Offset(uint64(offset))
 	queryTotal := dbx.StatementBuilder.
@@ -100,6 +99,10 @@ func (r *Repository) GetAllMoviesPaginated(ctx context.Context, searchTerm *stri
 		From("movies").
 		Where("deleted_at IS NULL")
 
+	if sortByRating != nil {
+		selectQuery = selectQuery.
+			OrderByClause("avg_rating" + *sortByRating)
+	}
 	if starID != nil {
 		selectQuery = selectQuery.
 			Join("movie_stars on movies.id = movie_stars.movie_id").
@@ -117,6 +120,7 @@ func (r *Repository) GetAllMoviesPaginated(ctx context.Context, searchTerm *stri
 		queryTotal = queryTotal.
 			Where("search_vector @@ to_tsquery('english', ?)", *searchTerm)
 	}
+
 	b := &pgx.Batch{}
 	if err := dbx.QueueBatchSelect(b, selectQuery); err != nil {
 		return nil, 0, err
@@ -140,6 +144,7 @@ func (r *Repository) GetAllMoviesPaginated(ctx context.Context, searchTerm *stri
 			&movie.ID,
 			&movie.Title,
 			&movie.ReleaseDate,
+			&movie.AvgRating,
 			&movie.CreatedAt,
 			&movie.DeletedAt); err != nil {
 			return nil, 0, apperrors.Internal(err)
@@ -258,6 +263,17 @@ func (r *Repository) DeleteMovie(ctx context.Context, id int) error {
 		return apperrors.EnsureInternal(err)
 	}
 
+	return nil
+}
+
+func (r *Repository) Lock(ctx context.Context, tx pgx.Tx, movieID int) error {
+	n, err := r.db.Exec(ctx, `SELECT 1 FROM movies WHERE deleted_at IS NULL AND id = $1 for update`, movieID)
+	if err != nil {
+		return err
+	}
+	if n.RowsAffected() == 0 {
+		return apperrors.NotFound("movie", "id", movieID)
+	}
 	return nil
 }
 

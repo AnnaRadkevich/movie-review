@@ -3,6 +3,8 @@ package movies
 import (
 	"context"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
 
 	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
@@ -44,8 +46,8 @@ func (s *Service) GetMovieByID(ctx context.Context, id int) (*MovieDetails, erro
 	return m, err
 }
 
-func (s *Service) GetAllMoviesPaginated(ctx context.Context, searchTerm *string, starID *int, offset int, limit int) ([]*MovieDetails, int, error) {
-	return s.repo.GetAllMoviesPaginated(ctx, searchTerm, starID, offset, limit)
+func (s *Service) GetAllMoviesPaginated(ctx context.Context, searchTerm *string, sortByRating *string, starID *int, offset int, limit int) ([]*MovieDetails, int, error) {
+	return s.repo.GetAllMoviesPaginated(ctx, searchTerm, sortByRating, starID, offset, limit)
 }
 
 func (s *Service) UpdateMovie(ctx context.Context, movie *MovieDetails) error {
@@ -69,12 +71,17 @@ func (s *Service) DeleteMovie(ctx context.Context, id int) error {
 }
 
 func (s *Service) assemble(ctx context.Context, movie *MovieDetails) error {
-	var err error
-	if movie.Genres, err = s.genresService.GetGenreByMovieID(ctx, movie.ID); err != nil {
+	group, groupCtx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		var err error
+		movie.Genres, err = s.genresService.GetGenreByMovieID(groupCtx, movie.ID)
 		return err
-	}
-	if movie.Cast, err = s.starService.GetCastByMovieID(ctx, movie.ID); err != nil {
+	})
+	group.Go(func() error {
+		var err error
+		movie.Cast, err = s.starService.GetCastByMovieID(groupCtx, movie.ID)
 		return err
-	}
-	return err
+	})
+	return group.Wait()
 }

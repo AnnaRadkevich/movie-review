@@ -3,6 +3,8 @@ package movies
 import (
 	"net/http"
 
+	"golang.org/x/sync/singleflight"
+
 	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
 
 	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
@@ -17,6 +19,7 @@ import (
 type Handler struct {
 	service          *Service
 	paginationConfig config.PaginationConfig
+	reqGroup         singleflight.Group
 }
 
 func NewHandler(service *Service, paginationConfig config.PaginationConfig) *Handler {
@@ -58,29 +61,41 @@ func (h *Handler) CreateMovie(c echo.Context) error {
 }
 
 func (h *Handler) GetMovieByID(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetOrDeleteMovieByIDRequest](c)
+	res, err, _ := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[contracts.GetOrDeleteMovieByIDRequest](c)
+		if err != nil {
+			return nil, err
+		}
+		movie, err := h.service.GetMovieByID(c.Request().Context(), req.ID)
+		if err != nil {
+			return nil, err
+		}
+		return movie, err
+	})
 	if err != nil {
 		return err
 	}
-	movie, err := h.service.GetMovieByID(c.Request().Context(), req.ID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, movie)
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetAllMovies(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetMoviesRequest](c)
+	res, err, _ := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[contracts.GetMoviesRequest](c)
+		if err != nil {
+			return nil, err
+		}
+		pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
+		offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
+		movies, total, err := h.service.GetAllMoviesPaginated(c.Request().Context(), req.SearchTerm, req.SortByRating, req.StarID, offset, limit)
+		if err != nil {
+			return nil, err
+		}
+		return pagination.Response(&req.PaginatedRequest, total, movies), nil
+	})
 	if err != nil {
 		return err
 	}
-	pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
-	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
-	movies, total, err := h.service.GetAllMoviesPaginated(c.Request().Context(), req.SearchTerm, req.StarID, offset, limit)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, pagination.Response(&req.PaginatedRequest, total, movies))
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) UpdateMovie(c echo.Context) error {

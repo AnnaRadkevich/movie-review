@@ -51,6 +51,6 @@ func (s *Service) DeleteReview(ctx context.Context, reviewID, userID int) error 
 		return err
 	}
 	log.FromContext(ctx).Info("review deleted",
-		"id", reviewID)
+		"reviewId", reviewID)
 	return nil
 }

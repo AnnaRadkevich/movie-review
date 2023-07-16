@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	"golang.org/x/sync/singleflight"
+
 	"github.com/cloudmachinery/movie-reviews/contracts"
 	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
 	"github.com/cloudmachinery/movie-reviews/internal/config"
@@ -15,6 +17,7 @@ import (
 type Handler struct {
 	service          *Service
 	paginationConfig config.PaginationConfig
+	reqGroup         singleflight.Group
 }
 
 func NewHandler(service *Service, paginationConfig config.PaginationConfig) *Handler {
@@ -44,32 +47,44 @@ func (h *Handler) CreateReview(c echo.Context) error {
 }
 
 func (h *Handler) GetReviewByID(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetReviewRequest](c)
+	res, err, _ := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[contracts.GetReviewRequest](c)
+		if err != nil {
+			return nil, err
+		}
+		review, err := h.service.GetReviewByID(c.Request().Context(), req.ReviewID)
+		if err != nil {
+			return nil, err
+		}
+		return review, nil
+	})
 	if err != nil {
 		return err
 	}
-	review, err := h.service.GetReviewByID(c.Request().Context(), req.ReviewID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, review)
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetAllReviewsPaginated(c echo.Context) error {
-	req, err := echox.BindAndValidate[contracts.GetReviewsRequest](c)
+	res, err, _ := h.reqGroup.Do(c.Request().RequestURI, func() (any, error) {
+		req, err := echox.BindAndValidate[contracts.GetReviewsRequest](c)
+		if err != nil {
+			return nil, err
+		}
+		if req.MovieID == nil && req.UserID == nil {
+			return nil, apperrors.BadRequest(errors.New("either movie_id or user_id must be provided"))
+		}
+		pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
+		offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
+		reviews, total, err := h.service.GetAllReviewsPaginated(c.Request().Context(), req.MovieID, req.UserID, offset, limit)
+		if err != nil {
+			return nil, err
+		}
+		return pagination.Response(&req.PaginatedRequest, total, reviews), nil
+	})
 	if err != nil {
 		return err
 	}
-	if req.MovieID == nil && req.UserID == nil {
-		return apperrors.BadRequest(errors.New("either movie_id or user_id must be provided"))
-	}
-	pagination.SetDefaults(&req.PaginatedRequest, h.paginationConfig)
-	offset, limit := pagination.OffsetLimit(&req.PaginatedRequest)
-	reviews, total, err := h.service.GetAllReviewsPaginated(c.Request().Context(), req.MovieID, req.UserID, offset, limit)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, pagination.Response(&req.PaginatedRequest, total, reviews))
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) UpdateReview(c echo.Context) error {
