@@ -68,8 +68,9 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 			With("title", movie.Title).
 			Debug("movie collected")
 
-		creditsLink, _ := url.JoinPath("https://www.imdb.com", info.URL, "/fullcredits")
-		castCollector.Visit(creditsLink)
+		// creditsLink, _ := url.JoinPath(info.URL, "/fullcredits")
+		// castCollector.Visit(creditsLink)
+
 	})
 
 	return collector

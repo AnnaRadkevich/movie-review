@@ -13,7 +13,6 @@ func GetOrCreateLocked[K comparable, V any](m map[K]V, key K, mx *sync.RWMutex, 
 	defer mx.Unlock()
 
 	v, ok = m[key]
-
 	if ok {
 		return v, false, nil
 	}

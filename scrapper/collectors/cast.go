@@ -44,7 +44,7 @@ func NewCastCollector(c *colly.Collector, starCollector *StarCollector, logger *
 
 		castHeader := e.DOM.Find("h4#cast")
 		if castHeader.Nodes != nil {
-			collector.addCastFromCastTable(cast, castHeader.Next(), 15)
+			collector.addCastFromCastTable(cast, castHeader.Next(), 1)
 		}
 
 		writerHeader := e.DOM.Find("h4#writer")
