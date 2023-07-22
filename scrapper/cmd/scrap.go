@@ -36,18 +36,18 @@ func NewScrapCmd(logger *slog.Logger) *cobra.Command {
 func runScrap(opts *ScrapOptions, logger *slog.Logger) error {
 	baseCollector := collectors.NewBaseCollector()
 
-	// bioCollector := collectors.NewBioCollector(collectors.Derive(baseCollector), logger)
-	// starCollector := collectors.NewStarCollector(collectors.Derive(baseCollector), bioCollector, logger)
-	// castCollector := collectors.NewCastCollector(collectors.Derive(baseCollector), starCollector, logger)
-	movieCollector := collectors.NewMovieCollector(collectors.Derive(baseCollector), nil, logger)
+	bioCollector := collectors.NewBioCollector(collectors.Derive(baseCollector), logger)
+	starCollector := collectors.NewStarCollector(collectors.Derive(baseCollector), bioCollector, logger)
+	castCollector := collectors.NewCastCollector(collectors.Derive(baseCollector), starCollector, logger)
+	movieCollector := collectors.NewMovieCollector(collectors.Derive(baseCollector), castCollector, logger)
 	topMoviesCollector := collectors.NewTopMoviesCollector(collectors.Derive(baseCollector), movieCollector, logger)
 
 	topMoviesCollector.Start()
 	topMoviesCollector.Wait()
 	movieCollector.Wait()
-	// castCollector.Wait()
-	// starCollector.Wait()
-	// bioCollector.Wait()
+	castCollector.Wait()
+	starCollector.Wait()
+	bioCollector.Wait()
 
 	writes := []struct {
 		data any
@@ -55,9 +55,9 @@ func runScrap(opts *ScrapOptions, logger *slog.Logger) error {
 	}{
 		{data: movieCollector.Movies(), path: filepath.Join(opts.Output, "movies.json")},
 		{data: movieCollector.Genres(), path: filepath.Join(opts.Output, "genres.json")},
-		//{data: castCollector.Cast(), path: filepath.Join(opts.Output, "cast.json")},
-		//{data: starCollector.Stars(), path: filepath.Join(opts.Output, "stars.json")},
-		//{data: bioCollector.Bios(), path: filepath.Join(opts.Output, "bios.json")},
+		{data: castCollector.Cast(), path: filepath.Join(opts.Output, "cast.json")},
+		{data: starCollector.Stars(), path: filepath.Join(opts.Output, "stars.json")},
+		{data: bioCollector.Bios(), path: filepath.Join(opts.Output, "bios.json")},
 	}
 
 	if err := os.MkdirAll(opts.Output, os.ModePerm); err != nil {
