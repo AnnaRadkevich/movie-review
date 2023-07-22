@@ -70,7 +70,6 @@ func NewMovieCollector(c *colly.Collector, castCollector *CastCollector, logger 
 
 		creditsLink, _ := url.JoinPath(info.URL, "/fullcredits")
 		castCollector.Visit(creditsLink)
-
 	})
 
 	return collector
