@@ -101,7 +101,7 @@ func (r *Repository) GetAllMoviesPaginated(ctx context.Context, searchTerm *stri
 
 	if sortByRating != nil {
 		selectQuery = selectQuery.
-			OrderByClause("avg_rating" + *sortByRating)
+			OrderByClause("avg_rating " + *sortByRating)
 	}
 	if starID != nil {
 		selectQuery = selectQuery.

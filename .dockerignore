@@ -10,3 +10,6 @@ tern
 Makefile
 client
 tests
+scrapper
+**/Dockerfile
+**/docker-compose.yaml
