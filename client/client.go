@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cloudmachinery/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
 	"github.com/go-resty/resty/v2"
 )
 

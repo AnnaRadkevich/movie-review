@@ -7,10 +7,10 @@ import (
 
 	"golang.org/x/exp/slog"
 
-	"github.com/cloudmachinery/movie-reviews/client"
-	"github.com/cloudmachinery/movie-reviews/contracts"
-	"github.com/cloudmachinery/movie-reviews/internal/maps"
-	"github.com/cloudmachinery/movie-reviews/internal/slices"
+	"github.com/RadkevichAnn/movie-reviews/client"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/internal/maps"
+	"github.com/RadkevichAnn/movie-reviews/internal/slices"
 	"golang.org/x/sync/errgroup"
 )
 

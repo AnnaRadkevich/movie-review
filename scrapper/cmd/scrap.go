@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cloudmachinery/movie-reviews/scrapper/collectors"
+	"github.com/RadkevichAnn/movie-reviews/scrapper/collectors"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slog"
 )

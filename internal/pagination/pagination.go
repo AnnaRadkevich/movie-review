@@ -1,8 +1,8 @@
 package pagination
 
 import (
-	"github.com/cloudmachinery/movie-reviews/contracts"
-	"github.com/cloudmachinery/movie-reviews/internal/config"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/internal/config"
 )
 
 func SetDefaults(r *contracts.PaginatedRequest, cfg config.PaginationConfig) {

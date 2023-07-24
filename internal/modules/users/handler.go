@@ -3,8 +3,8 @@ package users
 import (
 	"net/http"
 
-	"github.com/cloudmachinery/movie-reviews/contracts"
-	"github.com/cloudmachinery/movie-reviews/internal/echox"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/internal/echox"
 	"github.com/labstack/echo/v4"
 )
 

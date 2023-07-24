@@ -1,6 +1,6 @@
 package client
 
-import "github.com/cloudmachinery/movie-reviews/contracts"
+import "github.com/RadkevichAnn/movie-reviews/contracts"
 
 func (c *Client) CreateReview(req *contracts.AuthenticadedRequest[*contracts.CreateReviewRequest]) (*contracts.Review, error) {
 	var review contracts.Review

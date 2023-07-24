@@ -6,11 +6,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cloudmachinery/movie-reviews/internal/maps"
+	"github.com/RadkevichAnn/movie-reviews/internal/maps"
 	"golang.org/x/exp/slog"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/cloudmachinery/movie-reviews/scrapper/models"
+	"github.com/RadkevichAnn/movie-reviews/scrapper/models"
 	"github.com/gocolly/colly/v2"
 	"golang.org/x/net/html"
 )

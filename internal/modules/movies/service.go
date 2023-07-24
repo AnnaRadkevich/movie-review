@@ -5,11 +5,11 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/stars"
 
-	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/genres"
 
-	"github.com/cloudmachinery/movie-reviews/internal/log"
+	"github.com/RadkevichAnn/movie-reviews/internal/log"
 )
 
 type Service struct {

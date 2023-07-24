@@ -1,6 +1,6 @@
 package client
 
-import "github.com/cloudmachinery/movie-reviews/contracts"
+import "github.com/RadkevichAnn/movie-reviews/contracts"
 
 func (c *Client) GetUser(userId int) (*contracts.User, error) {
 	var u contracts.User

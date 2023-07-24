@@ -1,9 +1,9 @@
 package movies
 
 import (
-	"github.com/cloudmachinery/movie-reviews/internal/config"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
+	"github.com/RadkevichAnn/movie-reviews/internal/config"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/genres"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/stars"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

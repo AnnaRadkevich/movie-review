@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/cloudmachinery/movie-reviews/internal/log"
+	"github.com/RadkevichAnn/movie-reviews/internal/log"
 
-	"github.com/cloudmachinery/movie-reviews/scrapper/cmd"
+	"github.com/RadkevichAnn/movie-reviews/scrapper/cmd"
 	"github.com/spf13/cobra"
 )
 

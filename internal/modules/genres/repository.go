@@ -5,8 +5,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
-	"github.com/cloudmachinery/movie-reviews/internal/dbx"
+	"github.com/RadkevichAnn/movie-reviews/internal/apperrors"
+	"github.com/RadkevichAnn/movie-reviews/internal/dbx"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

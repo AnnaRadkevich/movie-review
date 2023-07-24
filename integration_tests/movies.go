@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudmachinery/movie-reviews/client"
-	"github.com/cloudmachinery/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/client"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
 	"github.com/stretchr/testify/require"
 )
 

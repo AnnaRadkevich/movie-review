@@ -3,13 +3,13 @@ package auth
 import (
 	"net/http"
 
-	"github.com/cloudmachinery/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
 
-	"github.com/cloudmachinery/movie-reviews/internal/echox"
+	"github.com/RadkevichAnn/movie-reviews/internal/echox"
 
 	"gopkg.in/validator.v2"
 
-	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/users"
 	"github.com/labstack/echo/v4"
 )
 

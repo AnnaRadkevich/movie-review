@@ -5,14 +5,14 @@ import (
 
 	"golang.org/x/sync/singleflight"
 
-	"github.com/cloudmachinery/movie-reviews/internal/modules/stars"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/stars"
 
-	"github.com/cloudmachinery/movie-reviews/internal/modules/genres"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/genres"
 
-	"github.com/cloudmachinery/movie-reviews/contracts"
-	"github.com/cloudmachinery/movie-reviews/internal/config"
-	"github.com/cloudmachinery/movie-reviews/internal/echox"
-	"github.com/cloudmachinery/movie-reviews/internal/pagination"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/internal/config"
+	"github.com/RadkevichAnn/movie-reviews/internal/echox"
+	"github.com/RadkevichAnn/movie-reviews/internal/pagination"
 	"github.com/labstack/echo/v4"
 )
 

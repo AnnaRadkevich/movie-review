@@ -3,7 +3,7 @@ package users
 import (
 	"context"
 
-	"github.com/cloudmachinery/movie-reviews/internal/log"
+	"github.com/RadkevichAnn/movie-reviews/internal/log"
 )
 
 type Service struct {

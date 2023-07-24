@@ -1,7 +1,7 @@
 package stars
 
 import (
-	"github.com/cloudmachinery/movie-reviews/internal/config"
+	"github.com/RadkevichAnn/movie-reviews/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

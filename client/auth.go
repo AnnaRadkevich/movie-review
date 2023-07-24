@@ -1,6 +1,6 @@
 package client
 
-import "github.com/cloudmachinery/movie-reviews/contracts"
+import "github.com/RadkevichAnn/movie-reviews/contracts"
 
 func (c *Client) RegisterUser(req *contracts.RegisterUserRequest) (*contracts.User, error) {
 	var u contracts.User

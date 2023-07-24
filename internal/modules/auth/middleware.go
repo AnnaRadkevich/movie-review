@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/jwt"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
+	"github.com/RadkevichAnn/movie-reviews/internal/apperrors"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/jwt"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/users"
 	"github.com/labstack/echo/v4"
 )
 

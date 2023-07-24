@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cloudmachinery/movie-reviews/client"
-	"github.com/cloudmachinery/movie-reviews/contracts"
-	"github.com/cloudmachinery/movie-reviews/internal/config"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/users"
+	"github.com/RadkevichAnn/movie-reviews/client"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/internal/config"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/users"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/rand"
 )

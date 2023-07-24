@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cloudmachinery/movie-reviews/internal/maps"
+	"github.com/RadkevichAnn/movie-reviews/internal/maps"
 	"golang.org/x/exp/slog"
 
-	"github.com/cloudmachinery/movie-reviews/scrapper/models"
+	"github.com/RadkevichAnn/movie-reviews/scrapper/models"
 
 	"github.com/gocolly/colly/v2"
 )

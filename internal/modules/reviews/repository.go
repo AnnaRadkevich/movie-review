@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
-	"github.com/cloudmachinery/movie-reviews/internal/dbx"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/movies"
+	"github.com/RadkevichAnn/movie-reviews/internal/apperrors"
+	"github.com/RadkevichAnn/movie-reviews/internal/dbx"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/movies"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"

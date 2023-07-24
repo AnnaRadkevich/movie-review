@@ -1,8 +1,8 @@
 package reviews
 
 import (
-	"github.com/cloudmachinery/movie-reviews/internal/config"
-	"github.com/cloudmachinery/movie-reviews/internal/modules/movies"
+	"github.com/RadkevichAnn/movie-reviews/internal/config"
+	"github.com/RadkevichAnn/movie-reviews/internal/modules/movies"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

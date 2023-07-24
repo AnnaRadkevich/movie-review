@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/cloudmachinery/movie-reviews/client"
-	"github.com/cloudmachinery/movie-reviews/internal/apperrors"
+	"github.com/RadkevichAnn/movie-reviews/client"
+	"github.com/RadkevichAnn/movie-reviews/internal/apperrors"
 	"github.com/stretchr/testify/require"
 )
 

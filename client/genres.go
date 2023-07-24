@@ -1,6 +1,6 @@
 package client
 
-import "github.com/cloudmachinery/movie-reviews/contracts"
+import "github.com/RadkevichAnn/movie-reviews/contracts"
 
 func (c *Client) GetAllGenres() ([]*contracts.Genre, error) {
 	var genres []*contracts.Genre

@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/cloudmachinery/movie-reviews/internal/server"
+	"github.com/RadkevichAnn/movie-reviews/internal/server"
 	"golang.org/x/exp/slog"
 
-	"github.com/cloudmachinery/movie-reviews/internal/config"
+	"github.com/RadkevichAnn/movie-reviews/internal/config"
 )
 
 const gracefulTimeout = 10 * time.Second

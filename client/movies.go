@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/cloudmachinery/movie-reviews/contracts"
+	"github.com/RadkevichAnn/movie-reviews/contracts"
 )
 
 func (c *Client) CreateMovie(req *contracts.AuthenticadedRequest[*contracts.CreateMovieRequest]) (*contracts.MovieDetails, error) {

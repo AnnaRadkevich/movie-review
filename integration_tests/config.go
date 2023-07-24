@@ -3,7 +3,7 @@ package tests
 import (
 	"time"
 
-	"github.com/cloudmachinery/movie-reviews/internal/config"
+	"github.com/RadkevichAnn/movie-reviews/internal/config"
 )
 
 const testPaginationSize = 2
